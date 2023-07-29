@@ -1,12 +1,12 @@
 import modal
-# from utils import get_pdb
+from utils import get_pdb
 
 stub = modal.Stub("DiffDock")
 
 @stub.function()
-def update():#inp, file):# file, ligand_inp, ligand_file, n_it, n_samples, actual_steps, no_final_step_noise):
-    print('hello world')
-    # pdb_path = get_pdb(inp, file)
+def update(inp, file): # file, ligand_inp, ligand_file, n_it, n_samples, actual_steps, no_final_step_noise):
+    # print('hello world')
+    pdb_path = get_pdb(inp, file)
     # ligand_path = get_ligand(ligand_inp, ligand_file)
 
     # esm(
@@ -255,7 +255,8 @@ def update():#inp, file):# file, ligand_inp, ligand_file, n_it, n_samples, actua
 
 
 image = (
-    modal.Image.debian_slim(python_version="3.10")
+    modal.Image.debian_slim(python_version="3.10").
+        
 )
 
 
