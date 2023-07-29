@@ -256,6 +256,15 @@ def update():#inp, file):# file, ligand_inp, ligand_file, n_it, n_samples, actua
 
 image = (
     modal.Image.debian_slim(python_version="3.10")
+        .pip_install("oloren")
+        .pip_install("Pillow")
+        .apt_install("git")
+        .pip_install("torch")
+        .pip_install("git+https://github.com/facebookresearch/detectron2.git")
+        .pip_install("torchvision")
+        .pip_install("opencv-python")
+        .apt_install("libgl1-mesa-glx")
+        .apt_install("libglib2.0-0")
 )
 
 
