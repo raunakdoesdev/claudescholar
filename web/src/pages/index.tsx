@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import React from "react";
 import {
   LaptopOutlined,
   NotificationOutlined,
@@ -11,11 +10,10 @@ import {
 import type { MenuProps } from "antd";
 import { Breadcrumb, Input, Layout, Menu, Spin, theme } from "antd";
 import styles from "../styles/main.module.css";
-import { appRouter } from "~/server/api/root";
 import { api } from "~/utils/api";
-import { useRouter } from "next/router";
 import FileUpload from "~/components/FileUpload";
-import prisma from "@prisma/client";
+import { useChat } from "ai/react";
+import React from "react";
 
 const { Header, Content, Sider } = Layout;
 
@@ -24,12 +22,13 @@ const items1: MenuProps["items"] = ["1", "2", "3"].map((key) => ({
   label: `nav ${key}`,
 }));
 
+export const runtime = "experimental-edge";
+
 const App: React.FC = () => {
   const {
     token: { colorBgContainer },
   } = theme.useToken();
   const [text, setText] = React.useState<string>("");
-  const [messages, setMessages] = React.useState<string[]>([]);
 
   const documents = api.documents.getAll.useQuery();
   const addDocument = api.documents.add.useMutation({
@@ -48,18 +47,31 @@ const App: React.FC = () => {
     })
   }
 
-  const documentItems: MenuProps["items"] = [
+  const { messages, input, handleInputChange, handleSubmit } = useChat({
+    api: "/api/chat",
+  });
+
+  // createDocument.mutate({
+  //   text: "",
+  // });
+
+  const items1: MenuProps["items"] = ["1", "2", "3"].map((key) => ({
+    key,
+    label: `nav ${key}`,
+  }));
+
+  const items2: MenuProps["items"] = [
     UserOutlined,
     LaptopOutlined,
     NotificationOutlined,
   ].map((icon, index) => {
     const key = String(index + 1);
-  
+
     return {
       key: `sub${key}`,
       icon: React.createElement(icon),
       label: `subnav ${key}`,
-  
+
       children: documents.data?.map((document, j) => {
         const subKey = index * 4 + j + 1;
         return {
@@ -69,11 +81,6 @@ const App: React.FC = () => {
       }),
     };
   });
-
-  const sendText = () => {
-    setMessages([...messages, text]);
-    setText("");
-  };
 
 
 
@@ -95,7 +102,7 @@ const App: React.FC = () => {
             defaultSelectedKeys={["1"]}
             defaultOpenKeys={["sub1"]}
             style={{ height: "100%", borderRight: 0 }}
-            items={documentItems}
+            items={items2}
           />
         </Sider>
         <Layout style={{ padding: "0 24px 24px" }}>
@@ -115,27 +122,21 @@ const App: React.FC = () => {
             {messages.map((message, index) => {
               return (
                 <div key={index} className={styles.messageLine}>
-                  <div className={styles.message}>{message}</div>
+                  <div className={styles.message}>{message.content}</div>
                 </div>
               );
             })}
           </Content>
           <div className={styles.inputContainer}>
             <Input
-              value={text}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                console.log(e.target.value);
-                setText(e.target.value);
-              }}
-              onPressEnter={sendText}
+              value={input}
+              onChange={handleInputChange}
+              onPressEnter={handleSubmit as any}
               placeholder="Chat with me"
               addonAfter={
                 <SendOutlined
                   className="cursor-pointer text-gray-400 hover:text-black"
-                  onClick={() => {
-                    // sendText();
-                    addResult()
-                  }}
+                  onClick={handleSubmit as any}
                 />
               }
             />
