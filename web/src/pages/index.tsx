@@ -7,13 +7,14 @@ import {
   SendOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import type { MenuProps } from "antd";
+import { MenuProps, Modal, Checkbox } from "antd";
 import { Breadcrumb, Input, Layout, Menu, Spin, theme } from "antd";
 import styles from "../styles/main.module.css";
 import { api } from "~/utils/api";
 import FileUpload from "~/components/FileUpload";
 import { useChat } from "ai/react";
-import React from "react";
+import React, { useState } from "react";
+import { CheckboxChangeEvent } from "antd/es/checkbox";
 
 const { Header, Content, Sider } = Layout;
 
@@ -24,7 +25,16 @@ const App: React.FC = () => {
   const {
     token: { colorBgContainer },
   } = theme.useToken();
-  const [text, setText] = React.useState<string>("");
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedDocument, setSelectedDocument] = useState<any>(null);
+  const [folders, setFolders] = useState<string[]>(['pdfs', 'textbooks']);
+  const [addingFolder, setAddingFolder] = useState<boolean>(false);
+  const [folderName, setFolderName] = useState<string>('');
+
+  const handleMenuClick = (document: any) => {
+    setSelectedDocument(document);
+    setModalVisible(true);
+  };
 
   const documents = api.documents.getAll.useQuery();
 
@@ -53,29 +63,36 @@ const App: React.FC = () => {
     label: `nav ${key}`,
   }));
 
-  const items2: MenuProps["items"] = [
-    UserOutlined,
-    LaptopOutlined,
-    NotificationOutlined,
-  ].map((icon, index) => {
+  const items2: MenuProps["items"] = folders.map((icon, index) => {
     const key = String(index + 1);
+
+    // const filteredDocuments = documents.data?.filter((document) => document.folder === folders[index]);
 
     return {
       key: `sub${key}`,
-      icon: React.createElement(icon),
-      label: `subnav ${key}`,
+      icon: React.createElement(LaptopOutlined),
+      label: folders[index],
 
       children: documents.data?.map((document, j) => {
         const subKey = index * 4 + j + 1;
         return {
           key: subKey,
           label: document.id,
+          checked: selectedDocument === document.id, // Checkmark based on selectedDocument state
+          onClick: () => handleMenuClick(document), // Open modal on click
         };
       }),
     };
   });
 
+  const createNewFolder = () => {
+    setFolders([...folders, folderName]);
+    setAddingFolder(false);
+  }
 
+  const onChange = (e: CheckboxChangeEvent) => {
+    console.log(`checked = ${e.target.checked}`);
+  };
 
   return (
     <Layout className={styles.layout}>
@@ -94,9 +111,11 @@ const App: React.FC = () => {
             mode="inline"
             defaultSelectedKeys={["1"]}
             defaultOpenKeys={["sub1"]}
-            style={{ height: "100%", borderRight: 0 }}
+            style={{ height: "fit-content", borderRight: 0 }}
             items={items2}
           />
+          <div className="flex justify-center items-center flex-1 text-black p-4"><button onClick={()=>setAddingFolder(true)}>Add new folder</button></div>
+          {addingFolder && <div className="flex justify-center items-center flex-1 text-black p-4"><Input placeholder="Folder Name" value={folderName} type="text" onChange={(e)=>{setFolderName(e.target.value)}} onPressEnter={createNewFolder}/></div>}
         </Sider>
         <Layout style={{ padding: "0 24px 24px" }}>
           <Breadcrumb style={{ margin: "16px 0" }}>
@@ -104,6 +123,21 @@ const App: React.FC = () => {
             <Breadcrumb.Item>List</Breadcrumb.Item>
             <Breadcrumb.Item>App</Breadcrumb.Item>
           </Breadcrumb>
+          {modalVisible ? 
+          <Modal
+              title={selectedDocument.id}
+              centered
+              open={modalVisible}
+              footer={null}
+              onCancel={() => setModalVisible(false)}
+              bodyStyle={{
+                height: '50vh',
+                width: '50vw',
+              }}
+            >
+              <p>{selectedDocument.content}</p>
+            </Modal> : (
+            <>
           <Content
             style={{
               padding: 24,
@@ -133,6 +167,8 @@ const App: React.FC = () => {
                 />
               }
             />
+            </>
+          )}
         </Layout>
       </Layout>
     </Layout>

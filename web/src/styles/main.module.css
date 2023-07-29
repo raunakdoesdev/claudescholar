@@ -26,3 +26,7 @@
     border-radius: 16px;
     align-self: flex-end;
 }
+.modal {
+    height: 50vh;
+    background-color: white;
+}
