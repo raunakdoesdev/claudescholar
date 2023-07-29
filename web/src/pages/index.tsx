@@ -27,6 +27,8 @@ const App: React.FC = () => {
   const [text, setText] = React.useState<string>("");
 
   const documents = api.documents.getAll.useQuery();
+
+  // these next two functio calls create a new document
   const addDocument = api.documents.add.useMutation({
     async onSuccess() {
       // Refetch documents after successful add 
@@ -36,7 +38,6 @@ const App: React.FC = () => {
   })
   
   const newText = 'New document text'
-  // Call mutation 
   const addResult = () => {
     addDocument.mutateAsync({
       text: newText 
@@ -46,10 +47,6 @@ const App: React.FC = () => {
   const { messages, input, handleInputChange, handleSubmit } = useChat({
     api: "/api/chat",
   });
-
-  // createDocument.mutate({
-  //   text: "",
-  // });
 
   const items1: MenuProps["items"] = ["1", "2", "3"].map((key) => ({
     key,
