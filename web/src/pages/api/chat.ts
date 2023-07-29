@@ -1,15 +1,11 @@
 import { AnthropicStream, StreamingTextResponse } from "ai";
-import { NextApiRequest, NextApiResponse } from "next";
-import { NextResponse } from "next/server";
 import { env } from "~/env.mjs";
 
-// IMPORTANT! Set the runtime to edge
 export const runtime = "edge";
 
-// Build a prompt from the messages
 export interface Message {
   content: string;
-  role: "system" | "user" | "assistant";
+  role: "user" | "assistant";
 }
 
 function buildPrompt(messages: Message[]) {
@@ -26,8 +22,8 @@ function buildPrompt(messages: Message[]) {
   );
 }
 
-export async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const { messages } = req.body;
+export default async function handler(req: Request, res: Response) {
+  const { messages } = await req.json();
 
   const response = await fetch("https://api.anthropic.com/v1/complete", {
     method: "POST",
@@ -37,23 +33,19 @@ export async function handler(req: NextApiRequest, res: NextApiResponse) {
     },
     body: JSON.stringify({
       prompt: buildPrompt(messages),
-      model: "claude-v1",
+      model: "claude-2.0",
       max_tokens_to_sample: 300,
       temperature: 0.9,
       stream: true,
     }),
   });
 
-  // Check for errors
   if (!response.ok) {
-    NextResponse.json(await response.text(), {
+    return new Response(await response.text(), {
       status: response.status,
     });
   }
 
-  // Convert the response into a friendly text-stream
   const stream = AnthropicStream(response);
-
-  // Respond with the stream
   return new StreamingTextResponse(stream);
 }

@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import React from "react";
 import {
   LaptopOutlined,
   NotificationOutlined,
@@ -10,61 +9,57 @@ import {
 } from "@ant-design/icons";
 import type { MenuProps } from "antd";
 import { Breadcrumb, Input, Layout, Menu, Spin, theme } from "antd";
-import styles from "../styles/main.module.css";
-import Image from "next/image";
-import send from "../../public/send-icon.png";
-import { appRouter } from "~/server/api/root";
+import React, { useState, useEffect } from "react";
 import { api } from "~/utils/api";
-import { useRouter } from "next/router";
+import styles from "../styles/main.module.css";
+import { useChat } from "ai/react";
 
 const { Header, Content, Sider } = Layout;
 
-const items1: MenuProps["items"] = ["1", "2", "3"].map((key) => ({
-  key,
-  label: `nav ${key}`,
-}));
-
-const items2: MenuProps["items"] = [
-  UserOutlined,
-  LaptopOutlined,
-  NotificationOutlined,
-].map((icon, index) => {
-  const key = String(index + 1);
-
-  return {
-    key: `sub${key}`,
-    icon: React.createElement(icon),
-    label: `subnav ${key}`,
-
-    children: new Array(4).fill(null).map((_, j) => {
-      const subKey = index * 4 + j + 1;
-      return {
-        key: subKey,
-        label: `option${subKey}`,
-      };
-    }),
-  };
-});
+export const runtime = "experimental-edge";
 
 const App: React.FC = () => {
   const {
     token: { colorBgContainer },
   } = theme.useToken();
   const [text, setText] = React.useState<string>("");
-  const [messages, setMessages] = React.useState<string[]>([]);
 
   const documents = api.documents.getAll.useQuery();
   const createDocument = api.documents.add.useMutation();
 
-  createDocument.mutate({
-    text: "",
+  const { messages, input, handleInputChange, handleSubmit } = useChat({
+    api: "/api/chat",
   });
 
-  const sendText = () => {
-    console.log(text);
-    setMessages([...messages, text]);
-    setText("");
-  };
+  // createDocument.mutate({
+  //   text: "",
+  // });
+  const items1: MenuProps["items"] = ["1", "2", "3"].map((key) => ({
+    key,
+    label: `nav ${key}`,
+  }));
+
+  const items2: MenuProps["items"] = [
+    UserOutlined,
+    LaptopOutlined,
+    NotificationOutlined,
+  ].map((icon, index) => {
+    const key = String(index + 1);
+
+    return {
+      key: `sub${key}`,
+      icon: React.createElement(icon),
+      label: `subnav ${key}`,
+
+      children: new Array(4).fill(null).map((_, j) => {
+        const subKey = index * 4 + j + 1;
+        return {
+          key: subKey,
+          label: `option${subKey}`,
+        };
+      }),
+    };
+  });
 
   return (
     <Layout className={styles.layout}>
@@ -108,36 +103,24 @@ const App: React.FC = () => {
             {messages.map((message, index) => {
               return (
                 <div key={index} className={styles.messageLine}>
-                  <div className={styles.message}>{message}</div>
+                  <div className={styles.message}>{message.content}</div>
                 </div>
               );
             })}
           </Content>
           <div className={styles.inputContainer}>
             <Input
-              value={text}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                console.log(e.target.value);
-                setText(e.target.value);
-              }}
-              onPressEnter={sendText}
+              value={input}
+              onChange={handleInputChange}
+              onPressEnter={handleSubmit as any}
               placeholder="Chat with me"
               addonAfter={
                 <SendOutlined
                   className="cursor-pointer text-gray-400 hover:text-black"
-                  onClick={() => {
-                    sendText();
-                  }}
+                  onClick={handleSubmit as any}
                 />
               }
             />
-            {/* <Image
-              src={send}
-              alt="send"
-              width={50}
-              className={styles.send}
-              onClick={sendText}
-            /> */}
           </div>
         </Layout>
       </Layout>
