@@ -5,14 +5,14 @@ import axios from "axios";
 export const documentRouter = createTRPCRouter({
   add: publicProcedure
     .input(z.object({ text: z.string() }))
-    .mutation(({ ctx, input }) => {
+    .mutation(async ({ ctx, input }) => {
       console.log('Mutation called', input.text)
-      ctx.prisma.documents.create({
+      const createdDocument = await ctx.prisma.documents.create({
         data: {
           content: input.text,
         },
       });
-      return "added to db";
+      return createdDocument; // Return the created document instead of a string
     }),
 
   getAll: publicProcedure.query(({ ctx }) => {
