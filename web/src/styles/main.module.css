@@ -1,3 +1,34 @@
 .layout {
     height: 100vh;
 }
+.input {
+    border-radius: 16px;
+    background-color: rgb(202, 202, 255);
+    padding: 1rem;
+    width: 100%;
+}
+.send {
+    cursor: pointer;
+    background-color: #fff;
+}
+.inputContainer {
+    display: flex;
+    width: 100%;
+}
+.messageLine {
+    width: 100%;
+    display: flex;
+}
+.messageLine:nth-child(even) {
+    justify-content: flex-start;
+}
+.messageLine:nth-child(odd) {
+    justify-content: flex-end;
+}
+.message {
+    padding: 1rem;
+    background-color: rgb(202, 202, 255);
+    width: fit-content;
+    border-radius: 16px;
+    align-self: flex-end;
+}
