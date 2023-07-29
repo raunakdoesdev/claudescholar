@@ -11,11 +11,11 @@ import {
 import type { MenuProps } from "antd";
 import { Breadcrumb, Input, Layout, Menu, Spin, theme } from "antd";
 import styles from "../styles/main.module.css";
-import Image from "next/image";
-import send from "../../public/send-icon.png";
 import { appRouter } from "~/server/api/root";
 import { api } from "~/utils/api";
 import { useRouter } from "next/router";
+import FileUpload from "~/components/FileUpload";
+import prisma from "@prisma/client";
 
 const { Header, Content, Sider } = Layout;
 
@@ -23,28 +23,6 @@ const items1: MenuProps["items"] = ["1", "2", "3"].map((key) => ({
   key,
   label: `nav ${key}`,
 }));
-
-const items2: MenuProps["items"] = [
-  UserOutlined,
-  LaptopOutlined,
-  NotificationOutlined,
-].map((icon, index) => {
-  const key = String(index + 1);
-
-  return {
-    key: `sub${key}`,
-    icon: React.createElement(icon),
-    label: `subnav ${key}`,
-
-    children: new Array(4).fill(null).map((_, j) => {
-      const subKey = index * 4 + j + 1;
-      return {
-        key: subKey,
-        label: `option${subKey}`,
-      };
-    }),
-  };
-});
 
 const App: React.FC = () => {
   const {
@@ -54,26 +32,54 @@ const App: React.FC = () => {
   const [messages, setMessages] = React.useState<string[]>([]);
 
   const documents = api.documents.getAll.useQuery();
-  const createDocument = api.documents.add.useMutation();
+  const addDocument = api.documents.add.useMutation({
+    async onSuccess() {
+      // Refetch documents after successful add 
+      console.log('onSuccess')
+      await documents.refetch();
+    }
+  })
+  
+  const newText = 'New document text'
+  // Call mutation 
+  const addResult = () => {
+    addDocument.mutateAsync({
+      text: newText 
+    })
+  }
 
-  createDocument.mutate({
-    text: "",
+  const documentItems: MenuProps["items"] = [
+    UserOutlined,
+    LaptopOutlined,
+    NotificationOutlined,
+  ].map((icon, index) => {
+    const key = String(index + 1);
+  
+    return {
+      key: `sub${key}`,
+      icon: React.createElement(icon),
+      label: `subnav ${key}`,
+  
+      children: documents.data?.map((document, j) => {
+        const subKey = index * 4 + j + 1;
+        return {
+          key: subKey,
+          label: document.id,
+        };
+      }),
+    };
   });
 
   const sendText = () => {
-    console.log(text);
     setMessages([...messages, text]);
     setText("");
   };
 
+
+
   return (
     <Layout className={styles.layout}>
       <Header style={{ display: "flex", alignItems: "center" }}>
-        {documents.data ? (
-          <pre className="text-white">{JSON.stringify(documents.data)}</pre>
-        ) : (
-          <Spin />
-        )}
         <Menu
           theme="dark"
           mode="horizontal"
@@ -83,12 +89,13 @@ const App: React.FC = () => {
       </Header>
       <Layout>
         <Sider width={250} style={{ background: colorBgContainer }}>
+        <div className="flex justify-center items-center flex-1 text-white p-4"><FileUpload/></div>
           <Menu
             mode="inline"
             defaultSelectedKeys={["1"]}
             defaultOpenKeys={["sub1"]}
             style={{ height: "100%", borderRight: 0 }}
-            items={items2}
+            items={documentItems}
           />
         </Sider>
         <Layout style={{ padding: "0 24px 24px" }}>
@@ -126,18 +133,12 @@ const App: React.FC = () => {
                 <SendOutlined
                   className="cursor-pointer text-gray-400 hover:text-black"
                   onClick={() => {
-                    sendText();
+                    // sendText();
+                    addResult()
                   }}
                 />
               }
             />
-            {/* <Image
-              src={send}
-              alt="send"
-              width={50}
-              className={styles.send}
-              onClick={sendText}
-            /> */}
           </div>
         </Layout>
       </Layout>
