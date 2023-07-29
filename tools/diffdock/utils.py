@@ -1,6 +1,6 @@
 # import sys
 # import gradio as gr
-# import os
+import os
 
 # import copy
 # import os
@@ -49,5 +49,6 @@ def get_pdb(pdb_code="", filepath=""):
         if pdb_code is None or pdb_code == "":
             return None
         else:
-            os.system(f"wget -qnc https://files.rcsb.org/view/{pdb_code}.pdb")
+            # print('in if condition')
+            # print(os.system(f"wget -qnc https://files.rcsb.org/view/{pdb_code}.pdb"))
             return f"{pdb_code}.pdb"

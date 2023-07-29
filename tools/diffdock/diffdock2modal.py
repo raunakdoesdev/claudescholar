@@ -4,15 +4,15 @@ from utils import get_pdb
 stub = modal.Stub("DiffDock")
 
 @stub.function()
-def update(inp, file): # file, ligand_inp, ligand_file, n_it, n_samples, actual_steps, no_final_step_noise):
+def update(inp, file=None): # file, ligand_inp, ligand_file, n_it, n_samples, actual_steps, no_final_step_noise):
     # print('hello world')
-    pdb_path = get_pdb(inp, file)
+    pdb_path = get_pdb(inp)
     # ligand_path = get_ligand(ligand_inp, ligand_file)
 
-    # esm(
-    #     pdb_path,
-    #     f"data/{os.path.basename(pdb_path)}_prepared_for_esm.fasta",
-    # )
+    esm(
+        pdb_path,
+        f"data/{os.path.basename(pdb_path)}_prepared_for_esm.fasta",
+    )
     # tr_schedule = get_t_schedule(inference_steps=n_it)
     # rot_schedule = tr_schedule
     # tor_schedule = tr_schedule
@@ -241,8 +241,7 @@ def update(inp, file): # file, ligand_inp, ligand_file, n_it, n_samples, actual_
 
     # torch.cuda.empty_cache()
     return (
-        'hello_world_output'
-        # pdb_path
+        pdb_path
         # molecule(pdb_path, filenames[0], ligand_file),
         # gr.Dropdown.update(choices=labels, value=labels[0]),
         # filenames,
@@ -257,18 +256,16 @@ def update(inp, file): # file, ligand_inp, ligand_file, n_it, n_samples, actual_
 image = (
     modal.Image.debian_slim(python_version="3.10")
         .pip_install("oloren")
-        .pip_install("Pillow")
         .apt_install("git")
+        # .apt_install("wget")
         .pip_install("torch")
-        .pip_install("git+https://github.com/facebookresearch/detectron2.git")
-        .pip_install("torchvision")
-        .pip_install("opencv-python")
-        .apt_install("libgl1-mesa-glx")
-        .apt_install("libglib2.0-0")
+        .pip_install("os")
 )
-
+pymc_image = modal.Image.conda().conda_install(
+    packages=["theano-pymc==1.1.2", "pymc3==3.11.2"],
+    channels=[],)
 
 @stub.local_entrypoint()
 def main():
-    pdb_output = update.call() #"6w70", "")
+    pdb_output = update.call("6w70")
     print("the pdb path is", pdb_output)
