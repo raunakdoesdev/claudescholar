@@ -123,9 +123,9 @@ const App: React.FC = () => {
               );
             })}
           </Content>
-          <div className={styles.inputContainer}>
             <Input
               value={input}
+              className={styles.input}
               onChange={handleInputChange}
               onPressEnter={handleSubmit as any}
               placeholder="Chat with me"
@@ -136,7 +136,6 @@ const App: React.FC = () => {
                 />
               }
             />
-          </div>
         </Layout>
       </Layout>
     </Layout>
