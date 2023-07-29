@@ -1,5 +1,6 @@
 import { AnthropicStream, StreamingTextResponse } from "ai";
 import { NextApiRequest, NextApiResponse } from "next";
+import { NextResponse } from "next/server";
 import { env } from "~/env.mjs";
 
 // IMPORTANT! Set the runtime to edge
@@ -45,7 +46,7 @@ export async function handler(req: NextApiRequest, res: NextApiResponse) {
 
   // Check for errors
   if (!response.ok) {
-    return new Response(await response.text(), {
+    NextResponse.json(await response.text(), {
       status: response.status,
     });
   }

@@ -9,10 +9,13 @@ import {
   UserOutlined,
 } from "@ant-design/icons";
 import type { MenuProps } from "antd";
-import { Breadcrumb, Input, Layout, Menu, theme } from "antd";
+import { Breadcrumb, Input, Layout, Menu, Spin, theme } from "antd";
 import styles from "../styles/main.module.css";
 import Image from "next/image";
 import send from "../../public/send-icon.png";
+import { appRouter } from "~/server/api/root";
+import { api } from "~/utils/api";
+import { useRouter } from "next/router";
 
 const { Header, Content, Sider } = Layout;
 
@@ -50,6 +53,13 @@ const App: React.FC = () => {
   const [text, setText] = React.useState<string>("");
   const [messages, setMessages] = React.useState<string[]>([]);
 
+  const documents = api.documents.getAll.useQuery();
+  const createDocument = api.documents.add.useMutation();
+
+  createDocument.mutate({
+    text: "",
+  });
+
   const sendText = () => {
     console.log(text);
     setMessages([...messages, text]);
@@ -59,7 +69,11 @@ const App: React.FC = () => {
   return (
     <Layout className={styles.layout}>
       <Header style={{ display: "flex", alignItems: "center" }}>
-        <div className="demo-logo" />
+        {documents.data ? (
+          <pre className="text-white">{JSON.stringify(documents.data)}</pre>
+        ) : (
+          <Spin />
+        )}
         <Menu
           theme="dark"
           mode="horizontal"
