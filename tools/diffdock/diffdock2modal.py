@@ -1,10 +1,12 @@
 import modal
-from utils import get_pdb
+# from utils import get_pdb
 
 stub = modal.Stub("DiffDock")
 
-def update(inp, file):# file, ligand_inp, ligand_file, n_it, n_samples, actual_steps, no_final_step_noise):
-    pdb_path = get_pdb(inp, file)
+@stub.function()
+def update():#inp, file):# file, ligand_inp, ligand_file, n_it, n_samples, actual_steps, no_final_step_noise):
+    print('hello world')
+    # pdb_path = get_pdb(inp, file)
     # ligand_path = get_ligand(ligand_inp, ligand_file)
 
     # esm(
@@ -239,7 +241,8 @@ def update(inp, file):# file, ligand_inp, ligand_file, n_it, n_samples, actual_s
 
     # torch.cuda.empty_cache()
     return (
-        pdb_path
+        'hello_world_output'
+        # pdb_path
         # molecule(pdb_path, filenames[0], ligand_file),
         # gr.Dropdown.update(choices=labels, value=labels[0]),
         # filenames,
@@ -256,7 +259,7 @@ image = (
 )
 
 
-@stub.local_entrypoint(gpu="a100")
+@stub.local_entrypoint()
 def main():
-    pdb_output = update.call("6w70", "")
+    pdb_output = update.call() #"6w70", "")
     print("the pdb path is", pdb_output)
