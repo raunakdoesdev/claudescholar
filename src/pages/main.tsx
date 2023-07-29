@@ -71,24 +71,25 @@ const App: React.FC = () => {
             }}
           >
             Content
-            <input
-                  value={text}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    console.log(e.target.value);
-                    setText(e.target.value);
-                  }}
-                  onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
-                    if (e.key === "Enter") {
-                      console.log("enter");
-                    }
-                  }}
-                  color="primary"
-                  aria-label="text"
-                  placeholder="chat"
-                  type="text"
-                  autoFocus
-                />
+            
           </Content>
+          <input
+                value={text}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                console.log(e.target.value);
+                setText(e.target.value);
+                }}
+                onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+                if (e.key === "Enter") {
+                    console.log("enter");
+                }
+                }}
+                color="primary"
+                aria-label="text"
+                placeholder="chat"
+                type="text"
+                autoFocus
+            />
         </Layout>
       </Layout>
     </Layout>
