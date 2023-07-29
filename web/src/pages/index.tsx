@@ -17,10 +17,6 @@ import React from "react";
 
 const { Header, Content, Sider } = Layout;
 
-const items1: MenuProps["items"] = ["1", "2", "3"].map((key) => ({
-  key,
-  label: `nav ${key}`,
-}));
 
 export const runtime = "experimental-edge";
 
