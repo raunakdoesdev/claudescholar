@@ -1,40 +1,47 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import React from 'react';
-import { LaptopOutlined, NotificationOutlined, UserOutlined } from '@ant-design/icons';
-import type { MenuProps } from 'antd';
-import { Breadcrumb, Layout, Menu, theme } from 'antd';
-import styles from '../styles/main.module.css'
-import Image from 'next/image'
-import send from '../../public/send-icon.png'
+import React from "react";
+import {
+  LaptopOutlined,
+  NotificationOutlined,
+  SendOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
+import type { MenuProps } from "antd";
+import { Breadcrumb, Input, Layout, Menu, theme } from "antd";
+import styles from "../styles/main.module.css";
+import Image from "next/image";
+import send from "../../public/send-icon.png";
 
 const { Header, Content, Sider } = Layout;
 
-const items1: MenuProps['items'] = ['1', '2', '3'].map((key) => ({
+const items1: MenuProps["items"] = ["1", "2", "3"].map((key) => ({
   key,
   label: `nav ${key}`,
 }));
 
-const items2: MenuProps['items'] = [UserOutlined, LaptopOutlined, NotificationOutlined].map(
-  (icon, index) => {
-    const key = String(index + 1);
+const items2: MenuProps["items"] = [
+  UserOutlined,
+  LaptopOutlined,
+  NotificationOutlined,
+].map((icon, index) => {
+  const key = String(index + 1);
 
-    return {
-      key: `sub${key}`,
-      icon: React.createElement(icon),
-      label: `subnav ${key}`,
+  return {
+    key: `sub${key}`,
+    icon: React.createElement(icon),
+    label: `subnav ${key}`,
 
-      children: new Array(4).fill(null).map((_, j) => {
-        const subKey = index * 4 + j + 1;
-        return {
-          key: subKey,
-          label: `option${subKey}`,
-        };
-      }),
-    };
-  },
-);
+    children: new Array(4).fill(null).map((_, j) => {
+      const subKey = index * 4 + j + 1;
+      return {
+        key: subKey,
+        label: `option${subKey}`,
+      };
+    }),
+  };
+});
 
 const App: React.FC = () => {
   const {
@@ -43,30 +50,35 @@ const App: React.FC = () => {
   const [text, setText] = React.useState<string>("");
   const [messages, setMessages] = React.useState<string[]>([]);
 
-  const sendText = () => { 
-    console.log(text)
-    setMessages([...messages, text])
-    setText("")
-  }  
+  const sendText = () => {
+    console.log(text);
+    setMessages([...messages, text]);
+    setText("");
+  };
 
   return (
     <Layout className={styles.layout}>
-      <Header style={{ display: 'flex', alignItems: 'center' }}>
+      <Header style={{ display: "flex", alignItems: "center" }}>
         <div className="demo-logo" />
-        <Menu theme="dark" mode="horizontal" defaultSelectedKeys={['2']} items={items1} />
+        <Menu
+          theme="dark"
+          mode="horizontal"
+          defaultSelectedKeys={["2"]}
+          items={items1}
+        />
       </Header>
       <Layout>
         <Sider width={250} style={{ background: colorBgContainer }}>
           <Menu
             mode="inline"
-            defaultSelectedKeys={['1']}
-            defaultOpenKeys={['sub1']}
-            style={{ height: '100%', borderRight: 0 }}
+            defaultSelectedKeys={["1"]}
+            defaultOpenKeys={["sub1"]}
+            style={{ height: "100%", borderRight: 0 }}
             items={items2}
           />
         </Sider>
-        <Layout style={{ padding: '0 24px 24px' }}>
-          <Breadcrumb style={{ margin: '16px 0' }}>
+        <Layout style={{ padding: "0 24px 24px" }}>
+          <Breadcrumb style={{ margin: "16px 0" }}>
             <Breadcrumb.Item>Home</Breadcrumb.Item>
             <Breadcrumb.Item>List</Breadcrumb.Item>
             <Breadcrumb.Item>App</Breadcrumb.Item>
@@ -80,43 +92,38 @@ const App: React.FC = () => {
             }}
           >
             {messages.map((message, index) => {
-                return (
-                  <div key={index} className={styles.messageLine}>
-                    <div className={styles.message}>
-                    {message}
-                    </div>
-                    </div>
-                );
-            }
-            )}
+              return (
+                <div key={index} className={styles.messageLine}>
+                  <div className={styles.message}>{message}</div>
+                </div>
+              );
+            })}
           </Content>
           <div className={styles.inputContainer}>
-            <input
-                value={text}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            <Input
+              value={text}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 console.log(e.target.value);
                 setText(e.target.value);
-                }}
-                onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
-                if (e.key === "Enter") {
-                    console.log("enter");
+              }}
+              onPressEnter={sendText}
+              placeholder="Chat with me"
+              addonAfter={
+                <SendOutlined
+                  className="cursor-pointer text-gray-400 hover:text-black"
+                  onClick={() => {
                     sendText();
-                }
-                }}
-                color="primary"
-                aria-label="text"
-                placeholder="chat"
-                type="text"
-                autoFocus
-                className={styles.input}
-            />
-            <Image
-                src={send}
-                alt="send"
-                width={50}
-                className={styles.send}
-                onClick={sendText}
+                  }}
                 />
+              }
+            />
+            {/* <Image
+              src={send}
+              alt="send"
+              width={50}
+              className={styles.send}
+              onClick={sendText}
+            /> */}
           </div>
         </Layout>
       </Layout>
