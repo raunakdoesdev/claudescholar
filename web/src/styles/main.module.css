@@ -32,3 +32,9 @@
     border-radius: 16px;
     align-self: flex-end;
 }
+
+.fileUpload {
+    justify-content: center;
+    display: flex;
+    padding: 1rem;
+}
