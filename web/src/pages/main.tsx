@@ -6,6 +6,8 @@ import { LaptopOutlined, NotificationOutlined, UserOutlined } from '@ant-design/
 import type { MenuProps } from 'antd';
 import { Breadcrumb, Layout, Menu, theme } from 'antd';
 import styles from '../styles/main.module.css'
+import Image from 'next/image'
+import send from '../../public/send-icon.png'
 
 const { Header, Content, Sider } = Layout;
 
@@ -38,7 +40,14 @@ const App: React.FC = () => {
   const {
     token: { colorBgContainer },
   } = theme.useToken();
-  const [text, setText] = React.useState("");
+  const [text, setText] = React.useState<string>("");
+  const [messages, setMessages] = React.useState<string[]>([]);
+
+  const sendText = () => { 
+    console.log(text)
+    setMessages([...messages, text])
+    setText("")
+  }  
 
   return (
     <Layout className={styles.layout}>
@@ -70,10 +79,19 @@ const App: React.FC = () => {
               background: colorBgContainer,
             }}
           >
-            Content
-            
+            {messages.map((message, index) => {
+                return (
+                  <div key={index} className={styles.messageLine}>
+                    <div className={styles.message}>
+                    {message}
+                    </div>
+                    </div>
+                );
+            }
+            )}
           </Content>
-          <input
+          <div className={styles.inputContainer}>
+            <input
                 value={text}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 console.log(e.target.value);
@@ -82,6 +100,7 @@ const App: React.FC = () => {
                 onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
                 if (e.key === "Enter") {
                     console.log("enter");
+                    sendText();
                 }
                 }}
                 color="primary"
@@ -89,7 +108,16 @@ const App: React.FC = () => {
                 placeholder="chat"
                 type="text"
                 autoFocus
+                className={styles.input}
             />
+            <Image
+                src={send}
+                alt="send"
+                width={50}
+                className={styles.send}
+                onClick={sendText}
+                />
+          </div>
         </Layout>
       </Layout>
     </Layout>
