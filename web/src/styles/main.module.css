@@ -3,17 +3,11 @@
 }
 .input {
     border-radius: 16px;
-    background-color: rgb(202, 202, 255);
-    padding: 1rem;
     width: 100%;
 }
 .send {
     cursor: pointer;
     background-color: #fff;
-}
-.inputContainer {
-    display: flex;
-    width: 100%;
 }
 .messageLine {
     width: 100%;
@@ -31,10 +25,4 @@
     width: fit-content;
     border-radius: 16px;
     align-self: flex-end;
-}
-
-.fileUpload {
-    justify-content: center;
-    display: flex;
-    padding: 1rem;
 }

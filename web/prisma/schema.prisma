@@ -13,4 +13,5 @@ datasource db {
 model Documents {
     id      String @id @default(cuid())
     content String
+    // name String
 }

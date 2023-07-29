@@ -9,12 +9,14 @@ import {
 } from "@ant-design/icons";
 import type { MenuProps } from "antd";
 import { Breadcrumb, Input, Layout, Menu, Spin, theme } from "antd";
-import React, { useState, useEffect } from "react";
-import { api } from "~/utils/api";
 import styles from "../styles/main.module.css";
+import { api } from "~/utils/api";
+import FileUpload from "~/components/FileUpload";
 import { useChat } from "ai/react";
+import React from "react";
 
 const { Header, Content, Sider } = Layout;
+
 
 export const runtime = "experimental-edge";
 
@@ -25,7 +27,21 @@ const App: React.FC = () => {
   const [text, setText] = React.useState<string>("");
 
   const documents = api.documents.getAll.useQuery();
-  const createDocument = api.documents.add.useMutation();
+  const addDocument = api.documents.add.useMutation({
+    async onSuccess() {
+      // Refetch documents after successful add 
+      console.log('onSuccess')
+      await documents.refetch();
+    }
+  })
+  
+  const newText = 'New document text'
+  // Call mutation 
+  const addResult = () => {
+    addDocument.mutateAsync({
+      text: newText 
+    })
+  }
 
   const { messages, input, handleInputChange, handleSubmit } = useChat({
     api: "/api/chat",
@@ -34,6 +50,7 @@ const App: React.FC = () => {
   // createDocument.mutate({
   //   text: "",
   // });
+
   const items1: MenuProps["items"] = ["1", "2", "3"].map((key) => ({
     key,
     label: `nav ${key}`,
@@ -51,24 +68,21 @@ const App: React.FC = () => {
       icon: React.createElement(icon),
       label: `subnav ${key}`,
 
-      children: new Array(4).fill(null).map((_, j) => {
+      children: documents.data?.map((document, j) => {
         const subKey = index * 4 + j + 1;
         return {
           key: subKey,
-          label: `option${subKey}`,
+          label: document.id,
         };
       }),
     };
   });
 
+
+
   return (
     <Layout className={styles.layout}>
       <Header style={{ display: "flex", alignItems: "center" }}>
-        {documents.data ? (
-          <pre className="text-white">{JSON.stringify(documents.data)}</pre>
-        ) : (
-          <Spin />
-        )}
         <Menu
           theme="dark"
           mode="horizontal"
@@ -78,6 +92,7 @@ const App: React.FC = () => {
       </Header>
       <Layout>
         <Sider width={250} style={{ background: colorBgContainer }}>
+        <div className="flex justify-center items-center flex-1 text-white p-4"><FileUpload/></div>
           <Menu
             mode="inline"
             defaultSelectedKeys={["1"]}
@@ -108,9 +123,9 @@ const App: React.FC = () => {
               );
             })}
           </Content>
-          <div className={styles.inputContainer}>
             <Input
               value={input}
+              className={styles.input}
               onChange={handleInputChange}
               onPressEnter={handleSubmit as any}
               placeholder="Chat with me"
@@ -121,7 +136,6 @@ const App: React.FC = () => {
                 />
               }
             />
-          </div>
         </Layout>
       </Layout>
     </Layout>
