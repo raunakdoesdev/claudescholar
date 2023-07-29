@@ -8,6 +8,7 @@ import { Breadcrumb, Layout, Menu, theme } from 'antd';
 import styles from '../styles/main.module.css'
 import Image from 'next/image'
 import send from '../../public/send-icon.png'
+import FileUpload from '~/components/FileUpload';
 
 const { Header, Content, Sider } = Layout;
 
@@ -57,6 +58,9 @@ const App: React.FC = () => {
       </Header>
       <Layout>
         <Sider width={250} style={{ background: colorBgContainer }}>
+          <div className={styles.fileUpload} >
+            <FileUpload />
+          </div>
           <Menu
             mode="inline"
             defaultSelectedKeys={['1']}
