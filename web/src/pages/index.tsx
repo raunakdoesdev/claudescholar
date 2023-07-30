@@ -129,7 +129,7 @@ export const FUNCTIONS: { [key: string]: any } = {
 function convertToXML(functions: typeof FUNCTIONS) {
   const inside = Object.keys(functions)
     .map((key) => {
-      const fn = functions["draw_molecule"];
+      const fn = functions[key];
       return `<function>
       <function-name>${key}</function-name>
       <function-description>${fn.description}</function-description>
@@ -148,8 +148,6 @@ function convertToXML(functions: typeof FUNCTIONS) {
   ${inside}
   </functions>`;
 }
-
-const xml = convertToXML(FUNCTIONS);
 
 const App: React.FC = () => {
   const {
@@ -170,6 +168,17 @@ const App: React.FC = () => {
   const folders = api.folders.getAll.useQuery();
 
   const [functionOutput, setFunctionOutput] = useState<string>("");
+
+  const [enabledFunctions, setEnabledFunctions] = useState(
+    Object.keys(FUNCTIONS)
+  );
+
+  const xml = React.useMemo(() => {
+    const enabledFuncsObj = Object.fromEntries(
+      enabledFunctions.map((key) => [key, FUNCTIONS[key]])
+    );
+    return convertToXML(enabledFuncsObj);
+  }, [enabledFunctions]);
 
   const {
     messages,
@@ -354,10 +363,6 @@ const App: React.FC = () => {
       handleSubmit(e);
     }
   }
-
-  const [enabledFunctions, setEnabledFunctions] = useState(
-    Object.keys(FUNCTIONS)
-  );
 
   return (
     <Layout className={styles.layout}>
