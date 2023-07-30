@@ -10,7 +10,7 @@ import { Breadcrumb, Input, Layout, Menu, theme } from "antd";
 import styles from "../styles/main.module.css";
 import { api } from "~/utils/api";
 import FileUpload from "~/components/FileUpload";
-import { useChat } from "ai/react";
+import { Message, useChat } from "ai/react";
 import React, { useState } from "react";
 import { CreateNewFolder } from "~/components/CreateNewFolder";
 import { DocModal } from "~/components/DocModal";
@@ -62,7 +62,7 @@ const App: React.FC = () => {
   }));
 
   const items2: MenuProps["items"] = folders.data?.map((folder, index) => {
-    const key = String(index + 1);
+    const key: string = String(index + 1);
 
     const filteredDocuments = documents.data?.filter(
       (document) => document.folderId === folder.id
@@ -74,7 +74,7 @@ const App: React.FC = () => {
       label: folder.title,
 
       children: filteredDocuments?.map((document: any, j: number) => {
-        const subKey = index * 4 + j + 1;
+        const subKey: number = index * 4 + j + 1;
         return {
           key: subKey,
           label: document.id,
@@ -85,27 +85,79 @@ const App: React.FC = () => {
     };
   });
 
-  const parseStream = (stream: string) => {
+  const parseXML = (xml: string) => {
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(xml, "text/xml");
+    console.log(xmlDoc)
+    // Get function name
+    const functionName = xmlDoc.querySelector("function-name")?.textContent; 
+
+    // Get parameters
+    const parameters:any[] = [];
+    const paramElements = xmlDoc.getElementsByTagName("parameter");
+
+    for (let param of paramElements) {
+      const nameElement = param.querySelector("parameter-name");
+      const valueElement = param.querySelector("parameter-value");
+      
+      const name = nameElement?.textContent;
+      const value = valueElement?.textContent;
+      
+      parameters.push({name, value});
+    }
+
+    // useless code to try to run the function   
+    // const params = parameters.map(p => p.name).join(', ');
+    // // Build function string
+    // let functionString = `function ${functionName}(${params}) {\n`;
+    
+    // functionString += `console.log('${functionName} called with: ' + `;
+  
+    // parameters.forEach(p => {
+    //   functionString += `${p.name}`;
+  
+    //   if(p !== parameters[parameters.length-1]) {
+    //     functionString += `+ ', ' + `;
+    //   }
+    // });
+  
+    // functionString += `);\n
+    // }`;
+  
+    // // Remove newlines
+    // functionString = functionString.replace(/\n/g, '');
+  
+    // // Execute 
+    // // console.log(functionString)
+    // const func = new Function(functionString);
+    // console.log(func)
+    // func();  
+  }
+
+  const parseStream = (message: Message) => {
+    if (message.role === 'user') {
+      return message.content;
+    }
+
+    const stream = message.content;
     if (stream.indexOf('<') === -1) {
-      console.log('no tags')
       return stream;
     }
 
     const functionNameStart = stream.indexOf('<');
     const functionNameEnd = stream.indexOf('>', functionNameStart);
     if (functionNameEnd === -1) {
-      console.log('no end tag')
       return stream.slice(0, functionNameStart);
     }
     const functionName = stream.slice(functionNameStart + 1, functionNameEnd);
     const endOfFunction = stream.indexOf('</'+functionName+'>');
     if (endOfFunction === -1) {
-      console.log('no end of function Name', functionName)
       return stream.slice(0, functionNameStart) + 'running ' + functionName;
     }
 
-    const xml = stream.slice(functionNameEnd + 1, endOfFunction + functionName.length + 3);
+    const xml = stream.slice(functionNameStart, endOfFunction + functionName.length + 3);
     console.log('xml', xml)
+    parseXML(xml);
     return stream.slice(0, functionNameStart) + functionName + stream.slice(endOfFunction + functionName.length + 3);
   }
 
@@ -153,12 +205,13 @@ const App: React.FC = () => {
                   margin: 0,
                   minHeight: 280,
                   background: colorBgContainer,
+                  overflow: 'auto',
                 }}
               >
                 {messages.map((message, index) => {
                   return (
                     <div key={index} className={styles.messageLine}>
-                      <div className={styles.message}>{parseStream(message.content)}</div>
+                      <div className={styles.message}>{parseStream(message)}</div>
                     </div>
                   );
                 })}
