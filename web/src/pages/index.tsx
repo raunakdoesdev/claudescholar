@@ -5,6 +5,7 @@ import {
   ExperimentOutlined,
   FireOutlined,
   LaptopOutlined,
+  ReloadOutlined,
   SearchOutlined,
   SendOutlined,
   StopOutlined,
@@ -41,7 +42,36 @@ interface Param {
 export const runtime = "experimental-edge";
 
 // define a json format that we can export into the above xml format
-export const FUNCTIONS: { [key: string]: any } = {
+const FUNCTIONS: { [key: string]: any } = {
+  generate_molecule_variants: {
+    icon: <ReloadOutlined />,
+    description:
+      "Generates variants of the given molecule using the CrEM algorithm and returns a list of promising mutated molecules.",
+    params: {
+      smiles: "The SMILES of the molecule to generate variants of",
+    },
+    execute: (uuid: string, params: { smiles: string }) => {
+      return fetch(
+        "https://dispatcher.236409319020.oloren.aws.olorencore.com/api/run/crem",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            uuid,
+            smiles: params.smiles,
+          }),
+        }
+      )
+        .then((res) => res.json())
+        .then(
+          (res: { generated: string[] }) =>
+            `The generated mols are ${res.generated.join(", ")}`
+        )
+        .catch((err: Error) => String(err.message));
+    },
+  },
   draw_protein: {
     icon: <FireOutlined />,
     description: "Draws the protein for the given PDB ID",
@@ -72,6 +102,7 @@ export const FUNCTIONS: { [key: string]: any } = {
     icon: <ExperimentOutlined />,
     description:
       "Allows user to enter a molecule via a chemical interface. Returns SMILES of compound.",
+    params: {},
     execute: (uuid: string, params: {}) => {
       return fetch(
         "https://dispatcher.236409319020.oloren.aws.olorencore.com/api/run/draw_molecule",
@@ -134,7 +165,7 @@ function convertToXML(functions: typeof FUNCTIONS) {
       <function-name>${key}</function-name>
       <function-description>${fn.description}</function-description>
       <function-parameters>
-        ${Object.keys(fn.execute).map((param) => {
+        ${Object.keys(fn.params).map((param) => {
           return `<parameter>
             <parameter-name>${param}</parameter-name>
             <parameter-desc>${param}</parameter-desc>
@@ -174,10 +205,11 @@ const App: React.FC = () => {
   );
 
   const xml = React.useMemo(() => {
-    const enabledFuncsObj = Object.fromEntries(
-      enabledFunctions.map((key) => [key, FUNCTIONS[key]])
-    );
-    return convertToXML(enabledFuncsObj);
+    const funcs: { [key: string]: any } = {};
+    enabledFunctions.forEach((key) => {
+      funcs[key] = FUNCTIONS[key];
+    });
+    return convertToXML(funcs);
   }, [enabledFunctions]);
 
   const {
