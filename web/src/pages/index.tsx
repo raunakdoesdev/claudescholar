@@ -53,35 +53,37 @@ const App: React.FC = () => {
     label: `nav ${key}`,
   }));
 
-  const items2: MenuProps["items"] = folders.data?.map((folder, index) => {
-    const key: string = String(index + 1);
+  const docMenuItems: MenuProps["items"] = folders.data?.map(
+    (folder, index) => {
+      const key: string = String(index + 1);
 
-    const filteredDocuments: any = documents.data?.filter(
-      (document) => document.folderId === folder.id
-    );
+      const filteredDocuments: any = documents.data?.filter(
+        (document) => document.folderId === folder.id
+      );
 
-    return {
-      key: `sub${key}`,
-      icon: React.createElement(LaptopOutlined),
-      label: folder.title,
+      return {
+        key: `sub${key}`,
+        icon: React.createElement(LaptopOutlined),
+        label: folder.title,
 
-      children: filteredDocuments?.map((document: Documents, j: number) => {
-        const subKey: number = index * 4 + j + 1;
-        return {
-          key: subKey,
-          label: document.name,
-          icon: (
-            <Checkbox
-              style={{ marginRight: 8 }}
-              onClick={(e) => handleCheck(e, document)}
-            />
-          ),
-          checked: selectedDocument === document.id, // Checkmark based on selectedDocument state
-          onClick: () => handleMenuClick(document), // Open modal on click
-        };
-      }),
-    };
-  });
+        children: filteredDocuments?.map((document: Documents, j: number) => {
+          const subKey: number = index * 4 + j + 1;
+          return {
+            key: subKey,
+            label: document.name,
+            icon: (
+              <Checkbox
+                style={{ marginRight: 8 }}
+                onClick={(e) => handleCheck(e, document)}
+              />
+            ),
+            checked: selectedDocument === document.id, // Checkmark based on selectedDocument state
+            onClick: () => handleMenuClick(document), // Open modal on click
+          };
+        }),
+      };
+    }
+  );
 
   const handleCheck = (e: any, document: any) => {
     e.stopPropagation(); // Prevent modal from opening
@@ -197,7 +199,7 @@ const App: React.FC = () => {
             defaultSelectedKeys={["1"]}
             defaultOpenKeys={["sub1"]}
             style={{ height: "fit-content", borderRight: 0 }}
-            items={items2}
+            items={docMenuItems}
           />
           <CreateNewFolder />
         </Sider>
