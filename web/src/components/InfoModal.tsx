@@ -38,8 +38,8 @@ export const InfoModal = () => {
         </Typography.Paragraph>
         <Typography.Paragraph>
           Try asking ClaudeScholar to search a topic on PubMed, to visualize a
-          protein, generate a new molecules that can bind to a given protein
-          using RFDiffusion, and instantly find similar molecules!
+          protein, generate new molecules that can bind to a given protein using
+          RFDiffusion, and instantly find similar molecules!
         </Typography.Paragraph>
         <Typography.Paragraph>
           To get started, click the "Get Started!" button below.
