@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import {
+  CheckCircleTwoTone,
   ExperimentOutlined,
   FireOutlined,
   LaptopOutlined,
@@ -10,19 +11,19 @@ import {
   SendOutlined,
   StopOutlined,
 } from "@ant-design/icons";
-import { Run, socket } from "@oloren/shared";
+import { Run } from "@oloren/shared";
 import { Documents } from "@prisma/client";
 import { Message, useChat } from "ai/react";
 import {
-  Breadcrumb,
   Button,
   Checkbox,
   Input,
   Layout,
   Menu,
   MenuProps,
+  Spin,
+  Tooltip,
   Typography,
-  message,
   theme,
 } from "antd";
 import React, { useState } from "react";
@@ -326,6 +327,8 @@ const App: React.FC = () => {
     return result;
   };
 
+  const [calls, setCalls] = useState<{ [key: string]: string }>({});
+
   const parseStream = (message: Message, run?: (x: string) => void) => {
     if (message.role === "user") {
       return message.content;
@@ -351,10 +354,8 @@ const App: React.FC = () => {
     const functionName = stream.slice(functionNameStart + 15, functionNameEnd);
 
     const endOfFunction = stream.indexOf("</function-call>");
-    console.log("endOfFunction", endOfFunction);
     if (endOfFunction === -1) {
-      console.log("HEY", functionStart);
-      return stream.slice(0, functionStart) + "running " + functionName;
+      return stream.slice(0, functionStart) + " " + functionName;
     }
 
     const xml = stream.slice(
@@ -367,15 +368,28 @@ const App: React.FC = () => {
       const res = parseXML(xml);
       FUNCTIONS[res.name as "draw_molecule"]
         .execute(uuid, res.parameters)
-        .then(run);
+        .then((out: string) => {
+          setCalls({ ...calls, [message.id]: out });
+          run(out);
+        });
     }
 
     return (
-      stream.slice(0, functionStart) +
-      " " +
-      functionName +
-      " " +
-      stream.slice(endOfFunction + 16)
+      <Typography.Text>
+        {stream.slice(0, functionStart)}{" "}
+        <div className="flex flex-row items-center space-x-4">
+          {message.id in calls ? (
+            <Tooltip title={calls[message.id]}>
+              <CheckCircleTwoTone twoToneColor={"#22C55E"} />
+            </Tooltip>
+          ) : (
+            <Spin />
+          )}
+          <Typography.Text></Typography.Text>
+          {functionName}
+        </div>{" "}
+        {stream.slice(endOfFunction + 16)}
+      </Typography.Text>
     );
   };
 
