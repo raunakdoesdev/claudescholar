@@ -22,11 +22,10 @@ export const FolderModal = ({
   const handleDelete = async () => {
     Modal.confirm({
       title: "Confirm Delete",
+      centered: true, // Center the modal on the page
       content:
         "Are you sure you want to delete this folder? Deleting this folder will delete all documents inside of it.",
       onOk: async () => {
-        // Perform the delete operation here
-        // Call your delete API or delete logic
         console.log("Deleting folder...");
         try {
           await deleteDocument({ id: folder.id });

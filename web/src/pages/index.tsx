@@ -58,8 +58,6 @@ const App: React.FC = () => {
 
   const handleIconClick = (e: any, folder: any) => {
     e.stopPropagation(); // Prevent modal from opening
-    // Do something when the icon is clicked, based on the folder
-    console.log("Icon clicked for folder:", folder);
     setSelectedFolder(folder);
     setFolderVisible(true);
   };
