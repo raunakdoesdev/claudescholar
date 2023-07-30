@@ -49,7 +49,7 @@ When the researcher’s prompt seems to match <function-description> for one of 
 
   `If there are no parameters required, you may simply omit the data. Additionally, the user may want you to include some context of different documents to inform your response. This is the additional data: ${additional_data}
 
-  When writing an output for a function you should write only the output and avoid including any additional error messages. 
+  When writing an output for a function you should write only the output and avoid including any additional error messages.
 `;
 
 function buildPrompt(
@@ -86,7 +86,7 @@ export default async function handler(req: Request, res: Response) {
       prompt: buildPrompt(messages, additional_data, functions),
       model: "claude-2.0",
       max_tokens_to_sample: 300,
-      temperature: 0.9,
+      temperature: 0.2,
       stream: true,
     }),
   });
