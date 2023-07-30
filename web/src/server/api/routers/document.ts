@@ -37,4 +37,27 @@ export const documentRouter = createTRPCRouter({
       });
       return deletedDocument;
     }),
+
+  update: publicProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        text: z.string(),
+        name: z.string(),
+        folderId: z.string().optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const updatedDocument = await ctx.prisma.documents.update({
+        where: {
+          id: input.id,
+        },
+        data: {
+          content: input.text,
+          name: input.name,
+          folderId: input.folderId,
+        } as Prisma.DocumentsUpdateInput,
+      });
+      return updatedDocument;
+    }),
 });

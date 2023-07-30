@@ -214,6 +214,7 @@ const App: React.FC = () => {
                 await documents.refetch();
               }}
               setModalVisible={setModalVisible}
+              folders={folders.data || []}
             />
           ) : (
             <>
