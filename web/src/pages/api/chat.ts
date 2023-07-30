@@ -8,7 +8,9 @@ export interface Message {
   role: "user" | "assistant";
 }
 
-const prompt = `For all future prompts imagine you are an expert technical assistant for biology researchers and that you should follow the following instructions:
+const prompt = (
+  additional_data: string
+) => `For all future prompts imagine you are an expert technical assistant for biology researchers and that you should follow the following instructions:
 Researchers may provide you with various documents for context. This content could include research papers, PDB files which represent a protein structure, and other file types. Researchers may ask you to synthesize information from these documents, or ask questions about what they contain, and you should always aim to answer truthfully from the document when possible.
 Researchers may also ask you to perform certain tasks that would require calling one of the functions from <functions> noted below. Every function, noted by <function-name> has a description <function-description> what the function does and what types of prompts should lead you to choose that function. It also includes <function-parameters> which has multiple required parameters with a name <parameter-name>. Each parameter has a field <parameter-desc> which describes the structure of that parameter. You must include all required parameters in your output and you should use the user’s input to extract what values they intended to use for that function. 
 The set of possible functions for you to call is:
@@ -59,11 +61,15 @@ You should output:
 <parameter-value>C0c1ccc(cc1)n2c3c(c(n2)C(=O)N)CCN(C3=O)c4ccc(cc4)N5CCCCC5=O<parameter-value>
 	</parameter>
 </function-call>
-`
 
-function buildPrompt(messages: Message[]) {
+Additionally, the user may want you to include some context of different documents to inform your response. This is the additional data: ${additional_data}
+`;
+
+function buildPrompt(messages: Message[], additional_data: string) {
   return (
-    prompt + "\n\n" + messages
+    prompt(additional_data) +
+    "\n\n" +
+    messages
       .map(({ content, role }) => {
         if (role === "user") {
           return `Human: ${content}`;
@@ -71,12 +77,13 @@ function buildPrompt(messages: Message[]) {
           return `Assistant: ${content}`;
         }
       })
-      .join("\n\n") + "Assistant:"
+      .join("\n\n") +
+    "Assistant:"
   );
 }
 
 export default async function handler(req: Request, res: Response) {
-  const { messages } = await req.json();
+  const { messages, additional_data } = await req.json();
 
   const response = await fetch("https://api.anthropic.com/v1/complete", {
     method: "POST",
@@ -85,7 +92,7 @@ export default async function handler(req: Request, res: Response) {
       "x-api-key": env.ANTHROPIC_API_KEY,
     },
     body: JSON.stringify({
-      prompt: buildPrompt(messages),
+      prompt: buildPrompt(messages, additional_data),
       model: "claude-2.0",
       max_tokens_to_sample: 300,
       temperature: 0.9,

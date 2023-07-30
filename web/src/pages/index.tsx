@@ -13,6 +13,7 @@ import { api } from "~/utils/api";
 import styles from "../styles/main.module.css";
 import { Run } from "@oloren/shared";
 import { v4 } from "uuid";
+import { Documents } from "@prisma/client";
 
 const { Header, Content, Sider } = Layout;
 
@@ -28,10 +29,9 @@ const App: React.FC = () => {
   } = theme.useToken();
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<any>(null);
-  const [checkedDocs, setCheckedDocs] = useState<any[]>([]);
-  console.log(checkedDocs);
+  const [checkedDocs, setCheckedDocs] = useState<Documents[]>([]);
 
-  const handleMenuClick = (document: any) => {
+  const handleMenuClick = (document: Documents) => {
     setSelectedDocument(document);
     setModalVisible(true);
   };
@@ -41,6 +41,11 @@ const App: React.FC = () => {
 
   const { messages, input, handleInputChange, handleSubmit } = useChat({
     api: "/api/chat",
+    body: {
+      additional_data: checkedDocs
+        .map((doc) => `title: ${doc.name} \ncontent: ${doc.content}`)
+        .join(","),
+    },
   });
 
   const items1: MenuProps["items"] = ["1", "2", "3"].map((key) => ({
@@ -60,7 +65,7 @@ const App: React.FC = () => {
       icon: React.createElement(LaptopOutlined),
       label: folder.title,
 
-      children: filteredDocuments?.map((document: any, j: number) => {
+      children: filteredDocuments?.map((document: Documents, j: number) => {
         const subKey: number = index * 4 + j + 1;
         return {
           key: subKey,
@@ -91,6 +96,7 @@ const App: React.FC = () => {
   }, [uuid]);
 
   const parseXML = (xml: string) => {
+    console.log(xml);
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(xml, "text/xml");
     console.log(xmlDoc);
@@ -127,27 +133,39 @@ const App: React.FC = () => {
       return stream;
     }
 
-    const functionNameStart = stream.indexOf("<");
-    const functionNameEnd = stream.indexOf(">", functionNameStart);
+    const functionStart = stream.indexOf("<");
+    const functionNameStart = stream.indexOf(
+      "<function-name>",
+      functionStart - 1
+    );
+    const functionNameEnd = stream.indexOf(
+      "</function-name>",
+      functionStart - 1
+    );
     if (functionNameEnd === -1) {
-      return stream.slice(0, functionNameStart);
+      return stream.slice(0, functionStart);
     }
-    const functionName = stream.slice(functionNameStart + 1, functionNameEnd);
-    const endOfFunction = stream.indexOf("</" + functionName + ">");
+    const functionName = stream.slice(functionNameStart + 15, functionNameEnd);
+
+    const endOfFunction = stream.indexOf("</function-call>");
+    console.log("endOfFunction", endOfFunction);
     if (endOfFunction === -1) {
-      return stream.slice(0, functionNameStart) + "running " + functionName;
+      console.log("HEY", functionStart);
+      return stream.slice(0, functionStart) + "running " + functionName;
     }
 
     const xml = stream.slice(
-      functionNameStart,
+      functionStart,
       endOfFunction + functionName.length + 3
     );
     console.log("xml", xml);
     parseXML(xml);
     return (
-      stream.slice(0, functionNameStart) +
+      stream.slice(0, functionStart) +
+      " " +
       functionName +
-      stream.slice(endOfFunction + functionName.length + 3)
+      " " +
+      stream.slice(endOfFunction + 16)
     );
   };
 
