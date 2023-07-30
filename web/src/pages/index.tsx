@@ -269,6 +269,7 @@ const App: React.FC = () => {
   return (
     <Layout className={styles.layout}>
       <Header style={{ display: "flex", alignItems: "center" }}>
+        <div className={styles.logo}>BioClaude</div>
         <Menu
           theme="dark"
           mode="horizontal"
