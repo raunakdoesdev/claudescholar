@@ -1,11 +1,6 @@
-import { api } from "~/utils/api";
-<<<<<<< HEAD
-import { Typography, Button, Modal } from "antd";
 import { DeleteOutlined } from "@ant-design/icons";
-=======
-import { Button, Modal } from "antd";
-import styles from "../styles/main.module.css";
->>>>>>> 29a60f462fdd9df19bf17020842403acac6eb28e
+import { Button, Modal, Typography } from "antd";
+import { api } from "~/utils/api";
 
 interface ModalProps {
   onDelete: () => void;
