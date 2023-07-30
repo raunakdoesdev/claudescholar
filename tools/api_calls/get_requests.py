@@ -2,13 +2,17 @@ import oloren as olo
 import pandas as pd
 import json
 import requests
+import xml.etree.ElementTree as ET
+
+
+ENTREZ_BASE_URL = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils'
 
 
 @olo.register(description="GET Request")
 def get_request(text=olo.String()):
     response = requests.get(text)
     response.raise_for_status()
-    return response.json()
+    return response.text
 
 @olo.register(description="GET PDB Request from REST API")
 def get_pdb(pdb_id=olo.String(), hierarchical_level=olo.String('entry'), identifier=olo.String()):
@@ -17,17 +21,38 @@ def get_pdb(pdb_id=olo.String(), hierarchical_level=olo.String('entry'), identif
 
     # Construct the full URL by adding the hierarchical_level, identifier, and pdb_id
     full_url = f"{base_url}/{hierarchical_level}/{pdb_id}/{identifier}"
-
     return full_url
 
 @olo.register(description="GET Pubmed Request from REST API")
 def search_entrez_db(database=olo.String(), query=olo.String()):
-    
-    base_url = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils'
-    
-    full_url = f"{base_url}/esearch.fcgi?db=<{database}>&term=<{query}>"
+    full_url = f"{ENTREZ_BASE_URL}/esearch.fcgi?db={database}&term={query}"
     return full_url
 
+@olo.register(description="Format UID List for Entrez Downloads")
+def format_uid_list(entrez_search_xml=olo.String()):
+    # Parse the XML string
+    root = ET.fromstring(entrez_search_xml)
+
+    # Find the <IdList> element
+    id_list_elem = root.find('IdList')
+    if id_list_elem is None:
+        return ''
+
+    # Extract all the UIDs into a list
+    uids = [elem.text for elem in id_list_elem.findall('Id')]
+
+    # Join the UIDs with commas
+    formatted_uids = ','.join(uids)
+    return formatted_uids
+
+@olo.register(description="Download Entrez Records for UIDs")
+def download_entrez_records_from_uid(database=olo.String(), uid_list=olo.String()): #, retrieval_type=olo.String(), retrieval_mode=olo.String()):
+    #TODO: Assert `uid_list` in correct format.
+    if uid_list == '':
+        return 'No UIDs found.'
+    full_url = f'{ENTREZ_BASE_URL}/efetch.fcgi?db={database}&id={uid_list}' #&rettype=<{retrieval_type}>&retmode=<{retrieval_mode}>'
+    print(full_url)
+    return get_request(full_url)
 
 if __name__ == "__main__":
-    olo.run("pdb_rest_api", port=2325)
+    olo.run("get_requests", port=2325)
