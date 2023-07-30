@@ -31,7 +31,7 @@ export const InfoModal = () => {
           ClaudeScholar is your knowledge repositiory and research assistant
           built to help you focus on the science that matters. Upload and search
           any articles via a chat interface to uncover insights across multiple
-          research papers. ClaudeScholar is equipped wiht tools to help you
+          research papers. ClaudeScholar is equipped with tools to help you
           launch complicated workflows like generating new compounds and
           modeling protein interactions using state of the art research such as
           RFDiffusion.
