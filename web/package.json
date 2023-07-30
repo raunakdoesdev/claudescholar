@@ -13,7 +13,7 @@
   "dependencies": {
     "@ant-design/icons": "^5.1.4",
     "@nanostores/react": "github:ai/react",
-    "@oloren/shared": "^0.0.2",
+    "@oloren/shared": "^0.0.3",
     "@prisma/client": "^5.0.0",
     "@t3-oss/env-nextjs": "^0.3.1",
     "@tanstack/react-query": "^4.29.7",
@@ -33,6 +33,7 @@
     "zod": "^3.21.4"
   },
   "devDependencies": {
+    "@module-federation/nextjs-mf": "^7.0.6",
     "@types/eslint": "^8.37.0",
     "@types/node": "^18.16.0",
     "@types/prettier": "^2.7.2",
