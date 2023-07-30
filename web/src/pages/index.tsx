@@ -342,21 +342,24 @@ const App: React.FC = () => {
                     <div
                       key={index}
                       className={
-                        "my-1 flex w-full flex-row " + message.role === "user"
+                        "my-1 flex w-full flex-row " +
+                        (message.role === "user"
                           ? "justify-end"
-                          : "justify-start"
+                          : "justify-start")
                       }
                     >
                       <div
                         className={
-                          "w-fit max-w-[70%] whitespace-pre-line rounded-md " +
-                            message.role ===
-                          "user"
+                          "w-fit max-w-[70%] whitespace-pre-line rounded-md p-2 " +
+                          (message.role === "user"
                             ? "bg-blue-200"
-                            : "bg-gray-200"
+                            : "bg-gray-200")
                         }
                       >
-                        {parseStream(message)}
+                        {index == messages.length - 1 &&
+                        message.role === "assistant"
+                          ? parseStream(message)
+                          : message.content}
                       </div>
                     </div>
                   );
