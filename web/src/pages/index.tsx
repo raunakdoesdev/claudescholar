@@ -100,7 +100,17 @@ const App: React.FC = () => {
   const documents = api.documents.getAll.useQuery();
   const folders = api.folders.getAll.useQuery();
 
-  const { messages, input, handleInputChange, handleSubmit, stop } = useChat({
+  const [functionOutput, setFunctionOutput] = useState<string>("");
+
+  const {
+    messages,
+    input,
+    setInput,
+    handleInputChange,
+    handleSubmit,
+    stop,
+    append,
+  } = useChat({
     api: "/api/chat",
     body: {
       functions: xml,
@@ -110,12 +120,7 @@ const App: React.FC = () => {
     },
     onFinish: (res) => {
       parseStream(res, (content) => {
-        console.log("Function output: ", content, messages);
-        // append({
-        //   id: v4(),
-        //   content: "Function output: " + content,
-        //   role: "assistant",
-        // });
+        setFunctionOutput(content);
       });
     },
   });
@@ -265,15 +270,25 @@ const App: React.FC = () => {
   };
 
   const [loading, setLoading] = useState(false);
+  const [connected, setConnected] = useState(false);
+
+  function submissionHandler(e: any) {
+    if (functionOutput) {
+      setFunctionOutput("");
+      const result = `function output: ${functionOutput}\n${input}`;
+      append({
+        role: "user",
+        content: result,
+      });
+      setInput("");
+    } else {
+      handleSubmit(e);
+    }
+  }
 
   return (
     <Layout className={styles.layout}>
       <Layout>
-        <Run.ManagedInterface
-          uuid={uuid}
-          setUuid={setUuid}
-          dispatcherUrl={dispatcherUrl}
-        />
         <Sider width={250} style={{ background: colorBgContainer }}>
           <div className="flex flex-1 items-center justify-center p-4 text-white">
             <FileUpload />
@@ -319,16 +334,17 @@ const App: React.FC = () => {
                   overflow: "auto",
                 }}
               >
-                <Button
+                <Run.ManagedInterface
+                  uuid={uuid}
+                  setUuid={setUuid}
+                  dispatcherUrl={dispatcherUrl}
+                />
+                {/* <Button
                   onClick={() => {
-                    const u = socket.manager.connect(dispatcherUrl, () => {
-                      message.success("Connected to Backend");
-                      setUuid(u);
-                    });
                   }}
                 >
                   Click to Connect
-                </Button>
+                </Button> */}
                 {messages.map((message, index) => {
                   return (
                     <div
@@ -348,64 +364,29 @@ const App: React.FC = () => {
                             : "bg-gray-200")
                         }
                       >
-                        {index == messages.length - 1 &&
-                        message.role === "assistant"
+                        {message.role === "assistant"
                           ? parseStream(message)
+                          : message.content.startsWith("function output: ")
+                          ? message.content.split("\n").slice(1).join("\n")
                           : message.content}
                       </div>
                     </div>
                   );
                 })}
               </Content>
-              <Button
-                loading={loading}
-                onClick={() => {
-                  setLoading(true);
-                  fetch(
-                    // "https://dispatcher.236409319020.oloren.aws.olorencore.com/api/run/calculate",
-                    // "https://dispatcher.236409319020.oloren.aws.olorencore.com/api/run/displaymol",
-                    // "https://dispatcher.236409319020.oloren.aws.olorencore.com/api/run/smiles",
-                    "https://dispatcher.236409319020.oloren.aws.olorencore.com/api/run/hello",
-                    {
-                      method: "POST",
-                      headers: {
-                        "Content-Type": "application/json",
-                      },
-                      body: JSON.stringify({
-                        uuid,
-                        // smiles: "CC(=O)NC1=CC=C(C=C1)",
-                        // operation: "Add",
-                        // num1: 123,
-                        // num2: 234,
-                      }),
-                    }
-                  )
-                    .then((res) => {
-                      res.json().then((data) => {
-                        setLoading(false);
-                        console.log(data);
-                      });
-                    })
-                    .catch(() => {
-                      setLoading(false);
-                    });
-                }}
-              >
-                {uuid}
-                Display Molecule
-              </Button>
+
               <Input
                 value={input}
                 className={styles.input}
                 onChange={handleInputChange}
                 size="large"
-                onPressEnter={handleSubmit as any}
+                onPressEnter={submissionHandler}
                 placeholder="Chat with me"
                 addonAfter={
-                  loading ? (
+                  !loading ? (
                     <SendOutlined
                       className="cursor-pointer text-gray-400 hover:text-black"
-                      onClick={handleSubmit as any}
+                      onClick={submissionHandler}
                     />
                   ) : (
                     <StopOutlined
