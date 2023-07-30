@@ -1,5 +1,6 @@
 import { api } from "~/utils/api";
 import { Button, Modal } from "antd";
+import styles from "../styles/main.module.css";
 
 interface ModalProps {
     onDelete: () => void;
@@ -27,8 +28,8 @@ export const DocModal = ({onDelete, selectedDocument, setModalVisible}: ModalPro
       visible={true}
       onCancel={() => setModalVisible(false)}
       bodyStyle={{
-        height: '50vh',
-        width: '50vw',
+        height: 'fit-content',
+        width: 'fit-content',
       }}
         footer={[
           <Button key="back" onClick={handleDelete}>

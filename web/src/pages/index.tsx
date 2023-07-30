@@ -158,7 +158,7 @@ const App: React.FC = () => {
                 {messages.map((message, index) => {
                   return (
                     <div key={index} className={styles.messageLine}>
-                      <div className={styles.message}>{message.content}</div>
+                      <div className={styles.message}>{parseStream(message.content)}</div>
                     </div>
                   );
                 })}

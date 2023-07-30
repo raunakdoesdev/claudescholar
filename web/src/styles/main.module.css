@@ -30,6 +30,5 @@
     align-self: flex-end;
 }
 .modal {
-    height: 50vh;
-    background-color: white;
+    padding: 2rem;
 }
