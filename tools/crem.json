@@ -1,0 +1,283 @@
+{
+  "nodes": [
+    {
+      "id": "node-0",
+      "data": {
+        "data": [
+          {
+            "mode": "node",
+            "value": "CC(=O)NC1=CC=C(C=C1)O"
+          }
+        ],
+        "num_inputs": 0,
+        "num_outputs": 1,
+        "operator": "https://nowsk7y5qyjge3cfzjmn7wl6ry0siipc.lambda-url.us-east-1.on.aws//operator/basic_mutation",
+        "hierarchy": [],
+        "logs": "",
+        "status": "finished",
+        "outputs": [
+          [
+            "O=C(CBr)Nc1ccc(O)cc1",
+            "O=C(CCBr)Nc1ccc(O)cc1",
+            "O=C(Nc1ccc(O)cc1)C1CC1",
+            "O=C(Nc1ccc(O)cc1)N1CC1",
+            "C=CC(=O)Nc1ccc(O)cc1",
+            "C#CC(=O)Nc1ccc(O)cc1",
+            "CCC(=O)Nc1ccc(O)cc1",
+            "C=C(Br)C(=O)Nc1ccc(O)cc1",
+            "C=C(C)C(=O)Nc1ccc(O)cc1",
+            "C#CCC(=O)Nc1ccc(O)cc1",
+            "CC=CC(=O)Nc1ccc(O)cc1",
+            "CC(C)C(=O)Nc1ccc(O)cc1",
+            "CCCC(=O)Nc1ccc(O)cc1",
+            "CC(N)C(=O)Nc1ccc(O)cc1",
+            "CCNC(=O)Nc1ccc(O)cc1",
+            "CCOC(=O)Nc1ccc(O)cc1",
+            "O=C(CCl)Nc1ccc(O)cc1",
+            "O=C(CCCl)Nc1ccc(O)cc1",
+            "O=C(Nc1ccc(O)cc1)C(Cl)Cl",
+            "CNC(=O)Nc1ccc(O)cc1",
+            "CN(C)C(=O)Nc1ccc(O)cc1",
+            "CNCC(=O)Nc1ccc(O)cc1",
+            "CN(O)C(=O)Nc1ccc(O)cc1",
+            "COC(=O)Nc1ccc(O)cc1",
+            "COCC(=O)Nc1ccc(O)cc1",
+            "CONC(=O)Nc1ccc(O)cc1",
+            "CSCC(=O)Nc1ccc(O)cc1",
+            "O=C(CF)Nc1ccc(O)cc1",
+            "O=CNc1ccc(O)cc1",
+            "O=C(CI)Nc1ccc(O)cc1",
+            "NC(=O)Nc1ccc(O)cc1",
+            "NCC(=O)Nc1ccc(O)cc1",
+            "N#CCC(=O)Nc1ccc(O)cc1",
+            "NCCC(=O)Nc1ccc(O)cc1",
+            "NC(=O)C(=O)Nc1ccc(O)cc1",
+            "NNC(=O)Nc1ccc(O)cc1",
+            "O=CC(=O)Nc1ccc(O)cc1",
+            "O=C(CO)Nc1ccc(O)cc1",
+            "O=C(O)C(=O)Nc1ccc(O)cc1",
+            "O=C(NO)Nc1ccc(O)cc1",
+            "O=C(C=NO)Nc1ccc(O)cc1",
+            "O=C(CS)Nc1ccc(O)cc1",
+            "O=C(CCS)Nc1ccc(O)cc1",
+            "CC(=O)Cc1ccc(O)cc1",
+            "CC(=O)C=Cc1ccc(O)cc1",
+            "CC(=O)CCc1ccc(O)cc1",
+            "CC(=O)NCCc1ccc(O)cc1",
+            "CC(=O)OCCc1ccc(O)cc1",
+            "CC(=O)C=C(C)c1ccc(O)cc1",
+            "CC(=O)C(C)=Cc1ccc(O)cc1",
+            "CC(=O)NCc1ccc(O)cc1",
+            "CC(=O)N(C)c1ccc(O)cc1",
+            "CC(=O)N(C)Cc1ccc(O)cc1",
+            "CC(=O)NN=Cc1ccc(O)cc1",
+            "CC(=O)OCc1ccc(O)cc1",
+            "CC(=O)COc1ccc(O)cc1",
+            "CC(=O)NNc1ccc(O)cc1",
+            "CC(=O)Oc1ccc(O)cc1",
+            "CC(=O)N(O)c1ccc(O)cc1",
+            "CC(=O)N(O)Cc1ccc(O)cc1",
+            "CC(=O)Nc1ccc(Br)cc1",
+            "CC(=O)Nc1ccc(CBr)cc1",
+            "CC(=O)Nc1ccc(C=CBr)cc1",
+            "CC(=O)Nc1ccc(CCBr)cc1",
+            "CC(=O)Nc1ccc(C)cc1",
+            "CC(=O)Nc1ccc(C2CC2)cc1",
+            "C=Cc1ccc(NC(C)=O)cc1",
+            "C#Cc1ccc(NC(C)=O)cc1",
+            "CCc1ccc(NC(C)=O)cc1",
+            "C=C(C)c1ccc(NC(C)=O)cc1",
+            "C=CCc1ccc(NC(C)=O)cc1",
+            "CC=Cc1ccc(NC(C)=O)cc1",
+            "CC(=O)Nc1ccc(C(C)C)cc1",
+            "CC#Cc1ccc(NC(C)=O)cc1",
+            "CCCc1ccc(NC(C)=O)cc1",
+            "CC(=O)Nc1ccc(C(C)N)cc1",
+            "CCNc1ccc(NC(C)=O)cc1",
+            "CC(=O)Nc1ccc(C(C)=O)cc1",
+            "CC(=O)Nc1ccc(C(C)O)cc1",
+            "CCOc1ccc(NC(C)=O)cc1",
+            "CCSc1ccc(NC(C)=O)cc1",
+            "CC(=O)Nc1ccc(Cl)cc1",
+            "CC(=O)Nc1ccc(CCl)cc1",
+            "CC(=O)Nc1ccc(CCCl)cc1",
+            "CC(=O)Nc1ccc(C(Cl)Cl)cc1",
+            "CNc1ccc(NC(C)=O)cc1",
+            "CC(=O)Nc1ccc(N(C)C)cc1",
+            "CNCc1ccc(NC(C)=O)cc1",
+            "COc1ccc(NC(C)=O)cc1",
+            "COCc1ccc(NC(C)=O)cc1",
+            "CSc1ccc(NC(C)=O)cc1",
+            "CSCc1ccc(NC(C)=O)cc1",
+            "CC(=O)Nc1ccc(F)cc1",
+            "CC(=O)Nc1ccc(CF)cc1",
+            "CC(=O)Nc1ccc(CCF)cc1",
+            "CC(=O)Nc1ccccc1",
+            "CC(=O)Nc1ccc(I)cc1",
+            "CC(=O)Nc1ccc(CI)cc1",
+            "CC(=O)Nc1ccc(CCI)cc1",
+            "CC(=O)Nc1ccc(N)cc1",
+            "CC(=O)Nc1ccc(C#N)cc1",
+            "CC(=O)Nc1ccc(CN)cc1",
+            "CC(=O)Nc1ccc(CC#N)cc1",
+            "CC(=O)Nc1ccc(CCN)cc1",
+            "CC(=O)Nc1ccc(C(=N)N)cc1",
+            "CC(=O)Nc1ccc(C(N)N)cc1",
+            "CC(=O)Nc1ccc(OC#N)cc1",
+            "CC(=O)Nc1ccc(C(N)=O)cc1",
+            "CC(=O)Nc1ccc(C(N)=S)cc1",
+            "CC(=O)Nc1ccc(NN)cc1",
+            "CC(=O)Nc1ccc(C=NN)cc1",
+            "CC(=O)Nc1ccc(CNN)cc1",
+            "CC(=O)Nc1ccc(ON)cc1",
+            "CC(=O)Nc1ccc(CON)cc1",
+            "CC(=O)Nc1ccc(C=O)cc1",
+            "CC(=O)Nc1ccc(CO)cc1",
+            "CC(=O)Nc1ccc(CC=O)cc1",
+            "CC(=O)Nc1ccc(CCO)cc1",
+            "CC(=O)Nc1ccc(C(=O)Cl)cc1",
+            "CC(=O)Nc1ccc(NC=O)cc1",
+            "CC(=O)Nc1ccc(C(=O)O)cc1",
+            "CC(=O)Nc1ccc(OC=O)cc1",
+            "CC(=O)Nc1ccc(C(O)O)cc1",
+            "CC(=O)Nc1ccc(C(O)=S)cc1",
+            "CC(=O)Nc1ccc(N=O)cc1",
+            "CC(=O)Nc1ccc(NO)cc1",
+            "CC(=O)Nc1ccc(C=NO)cc1",
+            "CC(=O)Nc1ccc(CNO)cc1",
+            "CC(=O)Nc1ccc([N+](=O)[O-])cc1",
+            "CC(=O)Nc1ccc(S)cc1",
+            "CC(=O)Nc1ccc(CS)cc1"
+          ]
+        ],
+        "subcomponents": {},
+        "metadata": {
+          "lambda": "https://nowsk7y5qyjge3cfzjmn7wl6ry0siipc.lambda-url.us-east-1.on.aws/",
+          "name": "Basic Mutation",
+          "description": "Basic CReM mutation - max_size=1, replacement database SA max of 2",
+          "args": [
+            {
+              "name": "smiles",
+              "ty": {
+                "secret": false,
+                "paragraph": false
+              },
+              "type": "String",
+              "default": null
+            }
+          ],
+          "num_outputs": 1,
+          "path": "value",
+          "operator": "basic_mutation"
+        },
+        "extension": {
+          "name": "crem",
+          "prod": true,
+          "type": "Lambda",
+          "tag": "latest",
+          "id": 103,
+          "store": false
+        },
+        "remote": {
+          "module": "Base Node",
+          "scope": "crem_extension",
+          "url": "https://static.236409319020.oloren.aws.olorencore.com/web/cremca17dd94-ef12-4e7c-a23f-7476bac78195/ui/remoteEntry.js"
+        },
+        "input_handles": {},
+        "lastNodeId": 77480
+      },
+      "position": {
+        "x": 150,
+        "y": 298
+      },
+      "type": "RemoteNode",
+      "width": 402,
+      "height": 188,
+      "selected": false,
+      "positionAbsolute": {
+        "x": 150,
+        "y": 298
+      },
+      "dragging": false
+    },
+    {
+      "id": "node-1",
+      "data": {
+        "data": {
+          "options": {
+            "numX": 3,
+            "numY": 3
+          }
+        },
+        "num_inputs": 1,
+        "num_outputs": 1,
+        "operator": "ui",
+        "hierarchy": [],
+        "logs": "User cancelled before entering input.",
+        "status": "error",
+        "outputs": [
+          {
+            "error": "User cancelled before entering input.",
+            "reserved": "error"
+          }
+        ],
+        "subcomponents": {},
+        "metadata": {
+          "name": "Molecule Grid",
+          "path": "./src/nodes/moleculegrid/Base.tsx",
+          "num_inputs": 1,
+          "num_outputs": 1,
+          "applet": {
+            "path": "./src/nodes/moleculegrid/Applet.tsx"
+          }
+        },
+        "extension": {
+          "name": "chemvis2",
+          "prod": true,
+          "type": "React",
+          "tag": "latest",
+          "id": 24,
+          "store": false
+        },
+        "remote": {
+          "module": "Molecule Grid",
+          "scope": "chemvisbasic",
+          "url": "https://static.236409319020.oloren.aws.olorencore.com/web/react/chemvis22c37fd22-a07b-49c8-a779-23663a458b45/remoteEntry.js"
+        },
+        "lastNodeId": 77481
+      },
+      "position": {
+        "x": 741,
+        "y": 147
+      },
+      "type": "RemoteNode",
+      "width": 418,
+      "height": 674,
+      "selected": true,
+      "positionAbsolute": {
+        "x": 741,
+        "y": 147
+      },
+      "dragging": false
+    }
+  ],
+  "edges": [
+    {
+      "source": "node-0",
+      "sourceHandle": "0",
+      "target": "node-1",
+      "targetHandle": "0",
+      "type": "FlowEdge",
+      "id": "node-0.0#node-1.0",
+      "data": {
+        "ptype": "Json"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 6,
+        "height": 6,
+        "color": "#000"
+      }
+    }
+  ]
+}

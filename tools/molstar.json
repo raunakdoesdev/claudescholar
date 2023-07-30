@@ -1,0 +1,217 @@
+{
+  "nodes": [
+    {
+      "id": "node-1",
+      "data": {
+        "data": {
+          "value": "",
+          "placeholder": "Enter text here",
+          "name": "hello"
+        },
+        "num_inputs": 0,
+        "num_outputs": 1,
+        "operator": "ui",
+        "hierarchy": [],
+        "logs": "",
+        "status": "finished",
+        "outputs": [
+          "1LOL"
+        ],
+        "subcomponents": {},
+        "log_example": {
+          "0": "pdbid"
+        },
+        "metadata": {
+          "name": "TextInput",
+          "path": "./src/nodes/textinput/Base.tsx",
+          "applet": {
+            "path": "./src/nodes/textinput/Applet.tsx"
+          },
+          "num_inputs": 0,
+          "num_outputs": 1,
+          "initial_data": {
+            "value": "",
+            "placeholder": "Enter text here"
+          }
+        },
+        "extension": {
+          "name": "basics",
+          "prod": true,
+          "type": "React",
+          "tag": "1.0.0",
+          "id": 22,
+          "store": true
+        },
+        "remote": {
+          "module": "TextInput",
+          "scope": "testing",
+          "url": "https://static.236409319020.oloren.aws.olorencore.com/web/store/react/basics/1.0.0/remoteEntry.js"
+        },
+        "retries": 2,
+        "lastNodeId": 77166
+      },
+      "position": {
+        "x": 332,
+        "y": 277
+      },
+      "type": "RemoteNode",
+      "width": 254,
+      "height": 160,
+      "selected": false,
+      "positionAbsolute": {
+        "x": 332,
+        "y": 277
+      },
+      "dragging": false
+    },
+    {
+      "id": "node-2",
+      "data": {
+        "data": {},
+        "num_inputs": 1,
+        "num_outputs": 1,
+        "operator": "ui",
+        "hierarchy": [],
+        "logs": "",
+        "status": "finished",
+        "outputs": [
+          "done"
+        ],
+        "subcomponents": {},
+        "metadata": {
+          "name": "Molstar In",
+          "path": "./src/nodes/molstarin/Base.tsx",
+          "num_inputs": 1,
+          "num_outputs": 1,
+          "applet": {
+            "path": "./src/nodes/molstarin/Applet.tsx"
+          }
+        },
+        "extension": {
+          "name": "chemvis2",
+          "prod": true,
+          "type": "React",
+          "tag": "latest",
+          "id": 59,
+          "store": false
+        },
+        "remote": {
+          "module": "Molstar In",
+          "scope": "chemvisbasic",
+          "url": "https://static.236409319020.oloren.aws.olorencore.com/web/react/chemvis2f49606c9-05fd-44bd-85f4-15843858004e/remoteEntry.js"
+        },
+        "lastNodeId": 77167,
+        "log_example": {
+          "0": "done"
+        }
+      },
+      "position": {
+        "x": 657,
+        "y": 319
+      },
+      "type": "RemoteNode",
+      "width": 254,
+      "height": 92,
+      "selected": false,
+      "positionAbsolute": {
+        "x": 657,
+        "y": 319
+      },
+      "dragging": false
+    },
+    {
+      "id": "node-3",
+      "data": {
+        "data": {},
+        "num_inputs": 1,
+        "num_outputs": 0,
+        "operator": "ui",
+        "hierarchy": [],
+        "logs": "",
+        "status": "finished",
+        "outputs": [],
+        "subcomponents": {},
+        "metadata": {
+          "name": "Display Text",
+          "path": "./src/nodes/display/text/Base.tsx",
+          "applet": {
+            "path": "./src/nodes/display/text/Applet.tsx"
+          },
+          "num_inputs": 1,
+          "num_outputs": 0
+        },
+        "extension": {
+          "name": "basics",
+          "prod": true,
+          "type": "React",
+          "tag": "1.0.0",
+          "id": 22,
+          "store": true
+        },
+        "remote": {
+          "module": "Display Text",
+          "scope": "testing",
+          "url": "https://static.236409319020.oloren.aws.olorencore.com/web/store/react/basics/1.0.0/remoteEntry.js"
+        },
+        "retries": 2,
+        "lastNodeId": 77168
+      },
+      "position": {
+        "x": 999,
+        "y": 305
+      },
+      "type": "RemoteNode",
+      "width": 254,
+      "height": 96,
+      "selected": false,
+      "positionAbsolute": {
+        "x": 999,
+        "y": 305
+      },
+      "dragging": false
+    }
+  ],
+  "edges": [
+    {
+      "source": "node-1",
+      "sourceHandle": "0",
+      "target": "node-2",
+      "targetHandle": "0",
+      "type": "FlowEdge",
+      "id": "node-1.0#node-2.0",
+      "data": {
+        "pmode": "Input",
+        "ptype": "Json",
+        "pname": "pdbid"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 6,
+        "height": 6,
+        "color": "#000"
+      },
+      "selected": false
+    },
+    {
+      "source": "node-2",
+      "sourceHandle": "0",
+      "target": "node-3",
+      "targetHandle": "0",
+      "type": "FlowEdge",
+      "id": "node-2.0#node-3.0",
+      "data": {
+        "pmode": "Output",
+        "ptype": "Json",
+        "pname": "done"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 6,
+        "height": 6,
+        "color": "#000"
+      },
+      "selected": false
+    }
+  ],
+  "exportName": "molstar"
+}
