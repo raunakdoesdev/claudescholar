@@ -1,19 +1,24 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { LaptopOutlined } from "@ant-design/icons";
-import { Run } from "@oloren/shared";
-import { useChat } from "ai/react";
-import { Breadcrumb, Button, Layout, Menu, MenuProps, theme } from "antd";
+import { LaptopOutlined, SendOutlined } from "@ant-design/icons";
+import { Button, MenuProps } from "antd";
+import { Breadcrumb, Input, Layout, Menu, theme } from "antd";
+import { Message, useChat } from "ai/react";
 import React, { useEffect, useState } from "react";
-import { v4 } from "uuid";
 import { CreateNewFolder } from "~/components/CreateNewFolder";
 import { DocModal } from "~/components/DocModal";
 import FileUpload from "~/components/FileUpload";
 import { api } from "~/utils/api";
 import styles from "../styles/main.module.css";
+import { Run } from "@oloren/shared";
+import { v4 } from "uuid";
 
 const { Header, Content, Sider } = Layout;
+
+interface Param {
+  [key: string]: string;
+}
 
 export const runtime = "experimental-edge";
 
@@ -60,7 +65,7 @@ const App: React.FC = () => {
   }));
 
   const items2: MenuProps["items"] = folders.data?.map((folder, index) => {
-    const key = String(index + 1);
+    const key: string = String(index + 1);
 
     const filteredDocuments = documents.data?.filter(
       (document) => document.folderId === folder.id
@@ -71,8 +76,8 @@ const App: React.FC = () => {
       icon: React.createElement(LaptopOutlined),
       label: folder.title,
 
-      children: filteredDocuments?.map((document, j) => {
-        const subKey = index * 4 + j + 1;
+      children: filteredDocuments?.map((document: any, j: number) => {
+        const subKey: number = index * 4 + j + 1;
         return {
           key: subKey,
           label: document.name,
@@ -88,6 +93,66 @@ const App: React.FC = () => {
   useEffect(() => {
     if (!uuid) setUuid(v4());
   }, [uuid]);
+  const parseXML = (xml: string) => {
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(xml, "text/xml");
+    console.log(xmlDoc);
+    // Get function name
+    const functionName = xmlDoc.querySelector("function-name")?.textContent;
+
+    // Get parameters
+    const parameters: Param = {};
+    const paramElements = Array.from(xmlDoc.querySelectorAll("parameter"));
+
+    paramElements.forEach((p: any) => {
+      const name = p.querySelector("parameter-name").textContent;
+      const value = p.querySelector("parameter-value").textContent;
+
+      parameters[name] = value;
+    });
+
+    const result = {
+      name: functionName,
+      parameters,
+    };
+
+    console.log(result);
+    return result;
+  };
+
+  const parseStream = (message: Message) => {
+    if (message.role === "user") {
+      return message.content;
+    }
+
+    const stream = message.content;
+    if (stream.indexOf("<") === -1) {
+      return stream;
+    }
+
+    const functionNameStart = stream.indexOf("<");
+    const functionNameEnd = stream.indexOf(">", functionNameStart);
+    if (functionNameEnd === -1) {
+      return stream.slice(0, functionNameStart);
+    }
+    const functionName = stream.slice(functionNameStart + 1, functionNameEnd);
+    const endOfFunction = stream.indexOf("</" + functionName + ">");
+    if (endOfFunction === -1) {
+      return stream.slice(0, functionNameStart) + "running " + functionName;
+    }
+
+    const xml = stream.slice(
+      functionNameStart,
+      endOfFunction + functionName.length + 3
+    );
+    console.log("xml", xml);
+    parseXML(xml);
+    return (
+      stream.slice(0, functionNameStart) +
+      functionName +
+      stream.slice(endOfFunction + functionName.length + 3)
+    );
+  };
 
   return (
     <Layout className={styles.layout}>
@@ -141,12 +206,15 @@ const App: React.FC = () => {
                   margin: 0,
                   minHeight: 280,
                   background: colorBgContainer,
+                  overflow: "auto",
                 }}
               >
                 {messages.map((message, index) => {
                   return (
                     <div key={index} className={styles.messageLine}>
-                      <div className={styles.message}></div>
+                      <div className={styles.message}>
+                        {parseStream(message)}
+                      </div>
                     </div>
                   );
                 })}
@@ -168,19 +236,6 @@ const App: React.FC = () => {
               >
                 Display Molecule
               </Button>
-              {/* <Input
-                value={input}
-                className={styles.input}
-                onChange={handleInputChange}
-                onPressEnter={handleSubmit as any}
-                placeholder="Chat with me"
-                addonAfter={
-                  <SendOutlined
-                    className="cursor-pointer text-gray-400 hover:text-black"
-                    onClick={handleSubmit as any}
-                  />
-                }
-              /> */}
             </>
           )}
         </Layout>

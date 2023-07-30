@@ -12,21 +12,23 @@
 .messageLine {
     width: 100%;
     display: flex;
+    padding: .5rem;
 }
 .messageLine:nth-child(even) {
     justify-content: flex-start;
+    padding-right: 2rem;
 }
 .messageLine:nth-child(odd) {
     justify-content: flex-end;
+    padding-left: 2rem;
 }
 .message {
     padding: 1rem;
     background-color: rgb(202, 202, 255);
-    width: fit-content;
+    max-width: 100%;
     border-radius: 16px;
     align-self: flex-end;
 }
 .modal {
-    height: 50vh;
-    background-color: white;
+    padding: 2rem;
 }
