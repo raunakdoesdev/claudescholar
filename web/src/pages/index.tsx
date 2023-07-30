@@ -414,6 +414,9 @@ const App: React.FC = () => {
     <Layout className={styles.layout}>
       <Layout>
         <Sider width={250} style={{ background: colorBgContainer }}>
+          <div className="flex flex-row items-center justify-center p-4 text-2xl font-semibold text-black">
+            ClaudeScholar
+          </div>
           <div className="flex flex-1 items-center justify-center p-4 text-white">
             <FileUpload />
           </div>
@@ -425,6 +428,7 @@ const App: React.FC = () => {
             items={docMenuItems}
           />
           <CreateNewFolder />
+          <h3 className="text-center">Tools</h3>
           <Menu
             mode="inline"
             style={{ height: "fit-content", borderRight: 0 }}
@@ -528,7 +532,7 @@ const App: React.FC = () => {
                 onChange={handleInputChange}
                 size="large"
                 onPressEnter={submissionHandler}
-                placeholder="Chat with me"
+                placeholder="Chat with BioClaude ..."
                 addonAfter={
                   !loading ? (
                     <SendOutlined
