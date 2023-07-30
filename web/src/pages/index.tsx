@@ -225,7 +225,7 @@ const App: React.FC = () => {
                     "https://dispatcher.236409319020.oloren.aws.olorencore.com/api/run/displaymol",
                     {
                       method: "POST",
-                      body: JSON.stringify({ uuid, smiles: "CCCCC" }),
+                      body: { uuid, smiles: "CCCCC" },
                     }
                   ).then((res) => {
                     res.json().then((data) => {
@@ -236,6 +236,19 @@ const App: React.FC = () => {
               >
                 Display Molecule
               </Button>
+              <Input
+                value={input}
+                className={styles.input}
+                onChange={handleInputChange}
+                onPressEnter={handleSubmit as any}
+                placeholder="Chat with me"
+                addonAfter={
+                  <SendOutlined
+                    className="cursor-pointer text-gray-400 hover:text-black"
+                    onClick={handleSubmit as any}
+                  />
+                }
+              />
             </>
           )}
         </Layout>
