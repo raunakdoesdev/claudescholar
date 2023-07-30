@@ -5,19 +5,18 @@ from utils import get_pdb
 stub = modal.Stub("DiffDock")
 
 image = (
-    modal.Image.conda(python_version="3.9")
+    modal.Image.micromamba(python_version="3.9")
     .apt_install('curl')  # add curl which is necessary to download micromamba
     .apt_install('wget')  # add wget which is necessary to download micromamba
     .apt_install('bzip2')  # add bzip2 which is necessary to unpack micromamba
     .apt_install('g++') 
-    .apt_install('gcc')
     .apt_install('git')
 )
 
-image = image.conda_install(
+image = image.micromamba_install(
     "pytorch==1.11.0",
     "pytorch-cuda=11.7",
-    channels=["pytorch", "nvidia"],
+   channels=["pytorch", "nvidia", "anaconda"] #"anaconda", "conda_forge"],
 ).pip_install(
     "torch-scatter",
     "torch-sparse",
@@ -36,16 +35,16 @@ image = image.conda_install(
     'pandas',
     'biopandas'
 )
+
 image = image.run_commands(
-    'export CUDA_HOME=/usr/local/cuda'
+    'export CUDA_HOME=/usr/local/cuda-11.7'
 )
+
 image = image.pip_install(
     "fair-esm[esmfold]",
     'dllogger @ git+https://github.com/NVIDIA/dllogger.git',
-    'openfold @ git+https://github.com/aqlaboratory/openfold.git@4b41059694619831a7db195b7e0988fc4ff3a307',
-    gpu='any',
+    # 'openfold @ git+https://github.com/aqlaboratory/openfold.git@4b41059694619831a7db195b7e0988fc4ff3a307',
 )
-
 
 @stub.function(image=image)
 def update(inp, file=None):  # file, ligand_inp, ligand_file, n_it, n_samples, actual_steps, no_final_step_noise):
@@ -308,5 +307,5 @@ def update(inp, file=None):  # file, ligand_inp, ligand_file, n_it, n_samples, a
 # @web_endpoint(label="foo-bar")
 @stub.local_entrypoint()
 def main():
-    pdb_path = update('6w70', '')
+    pdb_path = update.call('6w70', '')
     print(pdb_path)
