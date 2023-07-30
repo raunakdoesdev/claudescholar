@@ -2,19 +2,27 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { LaptopOutlined, SendOutlined, StopOutlined } from "@ant-design/icons";
-import { Button, MenuProps, message, Checkbox } from "antd";
-import { Breadcrumb, Input, Layout, Menu, theme } from "antd";
+import { Run, socket } from "@oloren/shared";
+import { Documents } from "@prisma/client";
 import { Message, useChat } from "ai/react";
-import React, { useEffect, useState } from "react";
+import {
+  Breadcrumb,
+  Button,
+  Checkbox,
+  Input,
+  Layout,
+  Menu,
+  MenuProps,
+  message,
+  theme,
+} from "antd";
+import React, { useState } from "react";
 import { CreateNewFolder } from "~/components/CreateNewFolder";
 import { DocModal } from "~/components/DocModal";
 import FileUpload from "~/components/FileUpload";
+import { FolderModal } from "~/components/FolderModal";
 import { api } from "~/utils/api";
 import styles from "../styles/main.module.css";
-import { Run, socket } from "@oloren/shared";
-import { Documents } from "@prisma/client";
-import { Interface } from "~/components/Interface";
-import { v4 } from "uuid";
 
 const { Header, Content, Sider } = Layout;
 
@@ -81,6 +89,8 @@ const App: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<any>(null);
   const [checkedDocs, setCheckedDocs] = useState<Documents[]>([]);
+  const [selectedFolder, setSelectedFolder] = useState<any>(null);
+  const [folderVisible, setFolderVisible] = useState(false);
 
   const handleMenuClick = (document: Documents) => {
     setSelectedDocument(document);
@@ -115,6 +125,12 @@ const App: React.FC = () => {
     label: `nav ${key}`,
   }));
 
+  const handleIconClick = (e: any, folder: any) => {
+    e.stopPropagation(); // Prevent modal from opening
+    setSelectedFolder(folder);
+    setFolderVisible(true);
+  };
+
   const docMenuItems: MenuProps["items"] = folders.data?.map(
     (folder, index) => {
       const key: string = String(index + 1);
@@ -125,7 +141,17 @@ const App: React.FC = () => {
 
       return {
         key: `sub${key}`,
-        icon: React.createElement(LaptopOutlined),
+        icon: (
+          <Button
+            type="text"
+            icon={<LaptopOutlined />}
+            onClick={(e) => handleIconClick(e, folder)}
+            style={{
+              display: "flex",
+              justifyContent: "center",
+            }}
+          />
+        ),
         label: folder.title,
 
         children: filteredDocuments?.map((document: Documents, j: number) => {
@@ -280,6 +306,15 @@ const App: React.FC = () => {
                 await documents.refetch();
               }}
               setModalVisible={setModalVisible}
+              folders={folders.data || []}
+            />
+          ) : folderVisible ? (
+            <FolderModal
+              folder={selectedFolder}
+              onDelete={async () => {
+                await folders.refetch();
+              }}
+              setModalVisible={setFolderVisible}
             />
           ) : (
             <>
