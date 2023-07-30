@@ -3,11 +3,52 @@ from modal import web_endpoint
 
 stub = modal.Stub("DiffDock")
 
+image = (
+    modal.Image.micromamba(python_version="3.9")
+    .apt_install('curl')  # add curl which is necessary to download micromamba
+    .apt_install('wget')  # add wget which is necessary to download micromamba
+    .apt_install('bzip2')  # add bzip2 which is necessary to unpack micromamba
+    .apt_install('g++') 
+    .apt_install('git')
+)
 
-# @stub.function()
-# def update(inp, file=None):  # file, ligand_inp, ligand_file, n_it, n_samples, actual_steps, no_final_step_noise):
-#     # print('hello world')
-#     pdb_path = get_pdb(inp)
+image = image.micromamba_install(
+    "pytorch==1.11.0",
+    "pytorch-cuda=11.7",
+   channels=["pytorch", "nvidia", "anaconda"] #"anaconda", "conda_forge"],
+).pip_install(
+    "torch-scatter",
+    "torch-sparse",
+    "torch-cluster",
+    "torch-spline-conv",
+    "torch-geometric==2.0.4",
+    find_links="https://data.pyg.org/whl/torch-1.11.0+cu117.html",
+).pip_install(
+    'PyYAML',
+    'scipy',
+    'networkx[default]',
+    'biopython',
+    'rdkit-pypi',
+    'e3nn',
+    'spyrmsd',
+    'pandas',
+    'biopandas'
+)
+
+image = image.run_commands(
+    'export CUDA_HOME=/usr/local/cuda-11.7'
+)
+
+image = image.pip_install(
+    "fair-esm[esmfold]",
+    'dllogger @ git+https://github.com/NVIDIA/dllogger.git',
+    # 'openfold @ git+https://github.com/aqlaboratory/openfold.git@4b41059694619831a7db195b7e0988fc4ff3a307',
+)
+
+@stub.function(image=image)
+def update(inp, file=None):  # file, ligand_inp, ligand_file, n_it, n_samples, actual_steps, no_final_step_noise):
+    print('hello world')
+    pdb_path = get_pdb(inp)
 #     # ligand_path = get_ligand(ligand_inp, ligand_file)
 
 #     esm(
@@ -241,35 +282,19 @@ stub = modal.Stub("DiffDock")
 # ]
 
 # torch.cuda.empty_cache()
-# return (
-#     pdb_path
-#     # molecule(pdb_path, filenames[0], ligand_file),
-#     # gr.Dropdown.update(choices=labels, value=labels[0]),
-#     # filenames,
-#     # pdb_path,
-#     # zippath,
-# )
+    return (
+        pdb_path
+    #     # molecule(pdb_path, filenames[0], ligand_file),
+    #     # gr.Dropdown.update(choices=labels, value=labels[0]),
+    #     # filenames,
+    #     # pdb_path,
+    #     # zippath,
+    )
 
 
 # conda install pytorch==1.11.0 pytorch-cuda=11.7 -c pytorch -c nvidia
 # pip install torch-scatter torch-sparse torch-cluster torch-spline-conv torch-geometric==2.0.4 -f https://data.pyg.org/whl/torch-1.11.0+cu117.html
 # python -m pip install PyYAML scipy "networkx[default]" biopython rdkit-pypi e3nn spyrmsd pandas biopandas
-
-
-image = modal.Image.conda()
-image = image.conda_install(
-    "pytorch==1.11.0",
-    "pytorch-cuda=11.7",
-    channels=["pytorch", "nvidia"],
-).pip_install(
-    "torch-scatter",
-    "torch-sparse",
-    "torch-cluster",
-    "torch-spline-conv",
-    "torch-geometric==2.0.4",
-    index_url="https://data.pyg.org/whl/torch-1.11.0+cu117.html",
-)
-
 
 # pymc_image = modal.Image.conda().conda_install(
 #     packages=["theano-pymc==1.1.2", "pymc3==3.11.2"],
@@ -277,7 +302,9 @@ image = image.conda_install(
 # )
 
 
-@stub.function(image=image)
-@web_endpoint(label="foo-bar")
+# @stub.function(image=image)
+# @web_endpoint(label="foo-bar")
+@stub.local_entrypoint()
 def main():
-    return "hello world"
+    pdb_path = update.call('6w70', '')
+    print(pdb_path)

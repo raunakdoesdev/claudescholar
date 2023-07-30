@@ -2,14 +2,15 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { LaptopOutlined, SendOutlined } from "@ant-design/icons";
-import { MenuProps, Modal, Checkbox } from "antd";
-import { Breadcrumb, Input, Layout, Menu, Spin, theme } from "antd";
+import { Button, MenuProps, Modal } from "antd";
+import { Breadcrumb, Input, Layout, Menu, theme } from "antd";
 import styles from "../styles/main.module.css";
 import { api } from "~/utils/api";
 import FileUpload from "~/components/FileUpload";
 import { useChat } from "ai/react";
 import React, { useState } from "react";
-import { CheckboxChangeEvent } from "antd/es/checkbox";
+import { CreateNewFolder } from "~/components/CreateNewFolder";
+import { DocModal } from "~/components/DocModal";
 
 const { Header, Content, Sider } = Layout;
 
@@ -40,9 +41,11 @@ const App: React.FC = () => {
   });
 
   const newText = "New document text";
+  const newName = "New document name";
   const addResult = () => {
     addDocument.mutateAsync({
       text: newText,
+      name: newName, // Pass the 'name' property along with 'text'
     });
   };
 
@@ -106,23 +109,15 @@ const App: React.FC = () => {
         <Layout style={{ padding: "0 24px 24px" }}>
           <Breadcrumb style={{ margin: "16px 0" }}>
             <Breadcrumb.Item>Home</Breadcrumb.Item>
-            <Breadcrumb.Item>List</Breadcrumb.Item>
-            <Breadcrumb.Item>App</Breadcrumb.Item>
           </Breadcrumb>
           {modalVisible ? (
-            <Modal
-              title={selectedDocument.id}
-              centered
-              open={modalVisible}
-              footer={null}
-              onCancel={() => setModalVisible(false)}
-              bodyStyle={{
-                height: "50vh",
-                width: "50vw",
+            <DocModal
+              selectedDocument={selectedDocument}
+              onDelete={async () => {
+                await documents.refetch();
               }}
-            >
-              <p>{selectedDocument.content}</p>
-            </Modal>
+              setModalVisible={setModalVisible}
+            />
           ) : (
             <>
               <Content
@@ -159,56 +154,6 @@ const App: React.FC = () => {
         </Layout>
       </Layout>
     </Layout>
-  );
-};
-
-const CreateNewFolder = () => {
-  const [addingFolder, setAddingFolder] = useState<boolean>(false);
-  const [folderName, setFolderName] = useState<string>("");
-  const folders = [] as any[];
-
-  const addFolderMutation = api.folders.add.useMutation({
-    // onSuccess will run after the mutation is successful
-    onSuccess: async () => {
-      // Refetch folders after successful add
-      console.log("onSuccess");
-      // await folders.refetch();
-      setAddingFolder(false);
-    },
-  });
-
-  const createNewFolder = async () => {
-    console.log("createNewFolder");
-
-    try {
-      // Call the mutation and wait for the response
-      const response = await addFolderMutation.mutateAsync({
-        text: folderName,
-      });
-    } catch (error) {
-      console.error("Error creating new folder:", error);
-    }
-  };
-
-  return (
-    <>
-      <div className="flex flex-1 items-center justify-center p-4 text-black">
-        <button onClick={() => setAddingFolder(true)}>Add new folder</button>
-      </div>
-      {addingFolder && (
-        <div className="flex flex-1 items-center justify-center p-4 text-black">
-          <Input
-            placeholder="Folder Name"
-            value={folderName}
-            type="text"
-            onChange={(e) => {
-              setFolderName(e.target.value);
-            }}
-            onPressEnter={createNewFolder}
-          />
-        </div>
-      )}
-    </>
   );
 };
 
