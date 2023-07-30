@@ -339,8 +339,23 @@ const App: React.FC = () => {
                 </Button>
                 {messages.map((message, index) => {
                   return (
-                    <div key={index} className={styles.messageLine}>
-                      <div className={styles.message}>
+                    <div
+                      key={index}
+                      className={
+                        "my-1 flex w-full flex-row " + message.role === "user"
+                          ? "justify-end"
+                          : "justify-start"
+                      }
+                    >
+                      <div
+                        className={
+                          "w-fit max-w-[70%] whitespace-pre-line rounded-md " +
+                            message.role ===
+                          "user"
+                            ? "bg-blue-200"
+                            : "bg-gray-200"
+                        }
+                      >
                         {parseStream(message)}
                       </div>
                     </div>
