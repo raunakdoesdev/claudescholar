@@ -9,8 +9,8 @@ from torch_scatter import scatter, scatter_mean
 import numpy as np
 from e3nn.nn import BatchNorm
 
-from utils import so3, torus
-from datasets.process_mols import lig_feature_dims, rec_residue_feature_dims
+from diffdock.utils import so3, torus
+from diffdock.datasets.process_mols import lig_feature_dims, rec_residue_feature_dims
 
 
 class AtomEncoder(torch.nn.Module):

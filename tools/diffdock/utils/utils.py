@@ -11,9 +11,9 @@ from rdkit import Chem
 from rdkit.Chem import RemoveHs, MolToPDBFile
 from torch_geometric.nn.data_parallel import DataParallel
 
-from models.all_atom_score_model import TensorProductScoreModel as AAScoreModel
-from models.score_model import TensorProductScoreModel as CGScoreModel
-from utils.diffusion_utils import get_timestep_embedding
+from diffdock.models.all_atom_score_model import TensorProductScoreModel as AAScoreModel
+from diffdock.models.score_model import TensorProductScoreModel as CGScoreModel
+from diffdock.utils.diffusion_utils import get_timestep_embedding
 from spyrmsd import rmsd, molecule
 
 

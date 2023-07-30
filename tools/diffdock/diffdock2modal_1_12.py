@@ -16,7 +16,7 @@ image = (
 )
 
 image = image.micromamba_install(
-    "pytorch==1.11.0",
+    "pytorch==1.13.0",
     "pytorch-cuda=11.7",
    channels=["pytorch", "nvidia", "anaconda"] #"anaconda", "conda_forge"],
 ).pip_install(
@@ -45,13 +45,10 @@ image = image.run_commands(
 image = image.pip_install(
     "fair-esm[esmfold]",
     'dllogger @ git+https://github.com/NVIDIA/dllogger.git',
+    
     # 'openfold @ git+https://github.com/aqlaboratory/openfold.git@4b41059694619831a7db195b7e0988fc4ff3a307',
 )
-
-
     
-# image = image.run_function(download_workdir)
-
 stub.image = image
 if stub.is_inside():
     import sys
@@ -217,37 +214,6 @@ def molecule(input_pdb, ligand_pdb, original_ligand):
     allow-top-navigation-by-user-activation allow-downloads" allowfullscreen="" 
     allowpaymentrequest="" frameborder="0" srcdoc='{x}'></iframe>"""
 
-@stub.function(image=image)
-def esm(protein_path, out_file):
-    import subprocess
-    from datasets.esm_embedding_preparation import esm_embedding_prep
-
-    print("running esm")
-    esm_embedding_prep(out_file, protein_path)
-    # create args object with defaults
-    os.environ["HOME"] = "esm/model_weights"
-    subprocess.call(
-        f"python esm/scripts/extract.py esm2_t33_650M_UR50D {out_file} data/esm2_output --repr_layers 33 --include per_tok",
-        shell=True,
-        env=os.environ,
-    )
-
-
-
-
-# conda install pytorch==1.11.0 pytorch-cuda=11.7 -c pytorch -c nvidia
-# pip install torch-scatter torch-sparse torch-cluster torch-spline-conv torch-geometric==2.0.4 -f https://data.pyg.org/whl/torch-1.11.0+cu117.html
-# python -m pip install PyYAML scipy "networkx[default]" biopython rdkit-pypi e3nn spyrmsd pandas biopandas
-
-# pymc_image = modal.Image.conda().conda_install(
-#     packages=["theano-pymc==1.1.2", "pymc3==3.11.2"],
-#     channels=[],
-# )
-
-
-# @stub.function(image=image)
-# @web_endpoint(label="foo-bar")
-
 @stub.cls(gpu="a100", mounts=[modal.Mount.from_local_dir("./", remote_path="/root/diffdock")])
 class DiffDock:
     
@@ -270,7 +236,7 @@ class DiffDock:
         import shutil
         from diffdock.utils.diffusion_utils import t_to_sigma as t_to_sigma_compl, get_t_schedule
         from diffdock.utils.utils import get_model
-
+        print('imported')
 
         self.score_model_args = score_model_args
         self.confidence_args = confidence_args
@@ -278,15 +244,16 @@ class DiffDock:
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         t_to_sigma = partial(t_to_sigma_compl, args=self.score_model_args)
-
+        print('gpu')
         self.model = get_model(self.score_model_args, device, t_to_sigma=t_to_sigma, no_parallel=True)
         state_dict = torch.load(
-            f"./workdir/paper_score_self.model/best_ema_inference_epoch_model.pt",
+            f"./diffdock/workdir/paper_score_self.model/best_ema_inference_epoch_model.pt",
             map_location=torch.device("cpu"),
         )
         self.model.load_state_dict(state_dict, strict=True)
         self.model = self.model.to(device)
         self.model.eval()
+        print('Loaded model')
 
         self.confidence_model = get_model(
             self.confidence_args,
@@ -302,6 +269,22 @@ class DiffDock:
         self.confidence_model.load_state_dict(state_dict, strict=True)
         self.confidence_model = self.confidence_model.to(device)
         self.confidence_model.eval()
+        print('Loaded confidence model')
+        print('Entry done')
+        
+    def esm(self, protein_path, out_file):
+        import subprocess
+        from diffdock.datasets.esm_embedding_preparation import esm_embedding_prep
+
+        print("running esm")
+        esm_embedding_prep(out_file, protein_path)
+        # create args object with defaults
+        os.environ["HOME"] = "esm/model_weights"
+        subprocess.call(
+            f"python esm/scripts/extract.py esm2_t33_650M_UR50D {out_file} data/esm2_output --repr_layers 33 --include per_tok",
+            shell=True,
+            env=os.environ,
+        )
 
     
     @modal.method()
@@ -327,10 +310,12 @@ class DiffDock:
         self.score_model_args = score_model_args
         self.confidence_args = confidence_args
 
+        print('update')
+        
         pdb_path = get_pdb(inp)
         ligand_path = get_ligand(ligand_inp, ligand_file)
 
-        esm(
+        self.esm(
             pdb_path,
             f"data/{os.path.basename(pdb_path)}_prepared_for_esm.fasta",
         )
@@ -404,8 +389,10 @@ class DiffDock:
             require_ligand=True,
             num_workers=1,
         )
+        print('confidence_test_dataset', confidence_test_dataset)
         confidence_complex_dict = {d.name: d for d in confidence_test_dataset}
         for idx, orig_complex_graph in tqdm(enumerate(test_loader)):
+            print('orig_complex_graph', orig_complex_graph)
             if (
                 self.confidence_model is not None
                 and not (
@@ -591,11 +578,10 @@ def main():
     pdb_file = ''
     ligand_smiles_str = 'COc1ccc(cc1)n2c3c(c(n2)C(=O)N)CCN(C3=O)c4ccc(cc4)N5CCCCC5=O'
     ligand_file = ''
-    n_it, n_samples, actual_steps, no_final_step_noise = 20, 10, 18, True
+    n_it, n_samples, actual_steps, no_final_step_noise = 1, 1, 18, True
     
     score_model_args, confidence_args = get_args.call()
     print(score_model_args, confidence_args)
-    
     diffdock = DiffDock()
     molecule = diffdock.update.call(pdb_code, pdb_file, ligand_smiles_str, ligand_file, n_it, n_samples, actual_steps, no_final_step_noise, score_model_args, confidence_args)
     print(molecule)

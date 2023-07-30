@@ -5,8 +5,8 @@ import torch.nn.functional as F
 from torch import nn
 from scipy.stats import beta
 
-from utils.geometry import axis_angle_to_matrix, rigid_transform_Kabsch_3D_torch
-from utils.torsion import modify_conformer_torsion_angles
+from diffdock.utils.geometry import axis_angle_to_matrix, rigid_transform_Kabsch_3D_torch
+from diffdock.utils.torsion import modify_conformer_torsion_angles
 
 
 def t_to_sigma(t_tr, t_rot, t_tor, args):

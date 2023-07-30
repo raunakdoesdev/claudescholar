@@ -2,8 +2,8 @@ import numpy as np
 import torch
 from torch_geometric.loader import DataLoader
 
-from utils.diffusion_utils import modify_conformer, set_time
-from utils.torsion import modify_conformer_torsion_angles
+from diffdock.utils.diffusion_utils import modify_conformer, set_time
+from diffdock.utils.torsion import modify_conformer_torsion_angles
 from scipy.spatial.transform import Rotation as R
 
 

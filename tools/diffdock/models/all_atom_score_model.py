@@ -6,9 +6,9 @@ from torch_cluster import radius, radius_graph
 from torch_scatter import scatter_mean
 import numpy as np
 
-from models.score_model import AtomEncoder, TensorProductConvLayer, GaussianSmearing
-from utils import so3, torus
-from datasets.process_mols import lig_feature_dims, rec_residue_feature_dims, rec_atom_feature_dims
+from diffdock.models.score_model import AtomEncoder, TensorProductConvLayer, GaussianSmearing
+from diffdock.utils import so3, torus
+from diffdock.datasets.process_mols import lig_feature_dims, rec_residue_feature_dims, rec_atom_feature_dims
 
 
 class TensorProductScoreModel(torch.nn.Module):
