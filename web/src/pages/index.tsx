@@ -471,7 +471,13 @@ const App: React.FC = () => {
             />
           ) : (
             <>
+              <Run.ManagedInterface
+                uuid={uuid}
+                setUuid={setUuid}
+                dispatcherUrl={dispatcherUrl}
+              />
               <Content
+                className={uuid ? "" : "hidden"}
                 style={{
                   padding: 24,
                   margin: 0,
@@ -480,11 +486,6 @@ const App: React.FC = () => {
                   overflow: "auto",
                 }}
               >
-                <Run.ManagedInterface
-                  uuid={uuid}
-                  setUuid={setUuid}
-                  dispatcherUrl={dispatcherUrl}
-                />
                 {/* <Button
                   onClick={() => {
                   }}
@@ -522,8 +523,8 @@ const App: React.FC = () => {
               </Content>
 
               <Input
+                className={uuid ? "" : "hidden"}
                 value={input}
-                className={styles.input}
                 onChange={handleInputChange}
                 size="large"
                 onPressEnter={submissionHandler}
