@@ -1,13 +1,17 @@
 import { api } from "~/utils/api";
-import { Button, Modal } from "antd";
+import { Typography, Button, Modal } from "antd";
+import { DeleteOutlined } from "@ant-design/icons";
 
 interface ModalProps {
-    onDelete: () => void;
-    selectedDocument: any;
-    setModalVisible: (visible: boolean) => void;
+  onDelete: () => void;
+  selectedDocument: any;
+  setModalVisible: (visible: boolean) => void;
 }
-export const DocModal = ({onDelete, selectedDocument, setModalVisible}: ModalProps) => {
-
+export const DocModal = ({
+  onDelete,
+  selectedDocument,
+  setModalVisible,
+}: ModalProps) => {
   const { mutateAsync: deleteDocument } = api.documents.delete.useMutation();
 
   const handleDelete = async () => {
@@ -17,26 +21,27 @@ export const DocModal = ({onDelete, selectedDocument, setModalVisible}: ModalPro
       setModalVisible(false);
     } catch (error) {
       console.error("Error deleting document:", error);
-    };
+    }
   };
 
   return (
     <Modal
-      title={selectedDocument.id}
+      title={selectedDocument.name}
       centered
-      visible={true}
+      open={true}
       onCancel={() => setModalVisible(false)}
-      bodyStyle={{
-        height: '50vh',
-        width: '50vw',
-      }}
-        footer={[
-          <Button key="back" onClick={handleDelete}>
-            Delete
-          </Button>,
-        ]}
-      >
-      <p>{selectedDocument.content}</p>
+      footer={[
+        <Button
+          key="back"
+          onClick={handleDelete}
+          icon={<DeleteOutlined />}
+          danger
+        >
+          Delete
+        </Button>,
+      ]}
+    >
+      <Typography.Paragraph>{selectedDocument.content}</Typography.Paragraph>
     </Modal>
-  )
-}
+  );
+};

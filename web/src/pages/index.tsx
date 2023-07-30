@@ -74,7 +74,7 @@ const App: React.FC = () => {
         const subKey = index * 4 + j + 1;
         return {
           key: subKey,
-          label: document.id,
+          label: document.name,
           checked: selectedDocument === document.id, // Checkmark based on selectedDocument state
           onClick: () => handleMenuClick(document), // Open modal on click
         };

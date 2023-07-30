@@ -5,12 +5,19 @@ import { Prisma } from "@prisma/client";
 
 export const documentRouter = createTRPCRouter({
   add: publicProcedure
-    .input(z.object({ text: z.string(), name: z.string() }))
+    .input(
+      z.object({
+        text: z.string(),
+        name: z.string(),
+        folderId: z.string().optional(),
+      })
+    )
     .mutation(async ({ ctx, input }) => {
       const createdDocument = await ctx.prisma.documents.create({
         data: {
           content: input.text,
-          name: input.name,
+          id: input.name,
+          folderId: input.folderId,
         } as Prisma.DocumentsCreateInput,
       });
       return createdDocument; // Return the created document instead of a string
@@ -36,11 +43,13 @@ export const documentRouter = createTRPCRouter({
     .input(z.object({ fileData: z.string() }))
     .mutation(async ({ ctx, input }) => {
       try {
-        
         // Step 1: Upload the file and perform the action on the external server
-        const response = await axios.post("https://external-server.example/upload", {
-          fileData: input.fileData,
-        });
+        const response = await axios.post(
+          "https://external-server.example/upload",
+          {
+            fileData: input.fileData,
+          }
+        );
 
         const resultText = response.data.resultText; // Assuming the response format from the external server is { resultText: '...' }
 
