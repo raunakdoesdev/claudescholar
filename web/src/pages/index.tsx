@@ -1,10 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import {
-  LaptopOutlined,
-  SendOutlined,
-} from "@ant-design/icons";
+import { LaptopOutlined, SendOutlined } from "@ant-design/icons";
 import { MenuProps, Modal, Checkbox } from "antd";
 import { Breadcrumb, Input, Layout, Menu, Spin, theme } from "antd";
 import styles from "../styles/main.module.css";
@@ -15,7 +12,6 @@ import React, { useState } from "react";
 import { CheckboxChangeEvent } from "antd/es/checkbox";
 
 const { Header, Content, Sider } = Layout;
-
 
 export const runtime = "experimental-edge";
 
@@ -37,18 +33,18 @@ const App: React.FC = () => {
   // these next two function calls create a new document
   const addDocument = api.documents.add.useMutation({
     async onSuccess() {
-      // Refetch documents after successful add 
-      console.log('onSuccess')
+      // Refetch documents after successful add
+      console.log("onSuccess");
       await documents.refetch();
-    }
-  })
-  
-  const newText = 'New document text'
+    },
+  });
+
+  const newText = "New document text";
   const addResult = () => {
     addDocument.mutateAsync({
-      text: newText 
-    })
-  }
+      text: newText,
+    });
+  };
 
   const { messages, input, handleInputChange, handleSubmit } = useChat({
     api: "/api/chat",
@@ -62,7 +58,9 @@ const App: React.FC = () => {
   const items2: MenuProps["items"] = folders.data?.map((folder, index) => {
     const key = String(index + 1);
 
-    const filteredDocuments = documents.data?.filter((document) => document.folderId === folder.id);
+    const filteredDocuments = documents.data?.filter(
+      (document) => document.folderId === folder.id
+    );
 
     return {
       key: `sub${key}`,
@@ -81,7 +79,6 @@ const App: React.FC = () => {
     };
   });
 
-
   return (
     <Layout className={styles.layout}>
       <Header style={{ display: "flex", alignItems: "center" }}>
@@ -94,7 +91,9 @@ const App: React.FC = () => {
       </Header>
       <Layout>
         <Sider width={250} style={{ background: colorBgContainer }}>
-        <div className="flex justify-center items-center flex-1 text-white p-4"><FileUpload/></div>
+          <div className="flex flex-1 items-center justify-center p-4 text-white">
+            <FileUpload />
+          </div>
           <Menu
             mode="inline"
             defaultSelectedKeys={["1"]}
@@ -102,7 +101,7 @@ const App: React.FC = () => {
             style={{ height: "fit-content", borderRight: 0 }}
             items={items2}
           />
-          <CreateNewFolder/>
+          <CreateNewFolder />
         </Sider>
         <Layout style={{ padding: "0 24px 24px" }}>
           <Breadcrumb style={{ margin: "16px 0" }}>
@@ -110,50 +109,51 @@ const App: React.FC = () => {
             <Breadcrumb.Item>List</Breadcrumb.Item>
             <Breadcrumb.Item>App</Breadcrumb.Item>
           </Breadcrumb>
-          {modalVisible ? 
-          <Modal
+          {modalVisible ? (
+            <Modal
               title={selectedDocument.id}
               centered
               open={modalVisible}
               footer={null}
               onCancel={() => setModalVisible(false)}
               bodyStyle={{
-                height: '50vh',
-                width: '50vw',
+                height: "50vh",
+                width: "50vw",
               }}
             >
               <p>{selectedDocument.content}</p>
-            </Modal> : (
+            </Modal>
+          ) : (
             <>
-          <Content
-            style={{
-              padding: 24,
-              margin: 0,
-              minHeight: 280,
-              background: colorBgContainer,
-            }}
-          >
-            {messages.map((message, index) => {
-              return (
-                <div key={index} className={styles.messageLine}>
-                  <div className={styles.message}>{message.content}</div>
-                </div>
-              );
-            })}
-          </Content>
-            <Input
-              value={input}
-              className={styles.input}
-              onChange={handleInputChange}
-              onPressEnter={handleSubmit as any}
-              placeholder="Chat with me"
-              addonAfter={
-                <SendOutlined
-                  className="cursor-pointer text-gray-400 hover:text-black"
-                  onClick={handleSubmit as any}
-                />
-              }
-            />
+              <Content
+                style={{
+                  padding: 24,
+                  margin: 0,
+                  minHeight: 280,
+                  background: colorBgContainer,
+                }}
+              >
+                {messages.map((message, index) => {
+                  return (
+                    <div key={index} className={styles.messageLine}>
+                      <div className={styles.message}>{message.content}</div>
+                    </div>
+                  );
+                })}
+              </Content>
+              <Input
+                value={input}
+                className={styles.input}
+                onChange={handleInputChange}
+                onPressEnter={handleSubmit as any}
+                placeholder="Chat with me"
+                addonAfter={
+                  <SendOutlined
+                    className="cursor-pointer text-gray-400 hover:text-black"
+                    onClick={handleSubmit as any}
+                  />
+                }
+              />
             </>
           )}
         </Layout>
@@ -164,21 +164,21 @@ const App: React.FC = () => {
 
 const CreateNewFolder = () => {
   const [addingFolder, setAddingFolder] = useState<boolean>(false);
-  const [folderName, setFolderName] = useState<string>('');
-  const folders = api.folders.getAll.useQuery();
+  const [folderName, setFolderName] = useState<string>("");
+  const folders = [] as any[];
 
   const addFolderMutation = api.folders.add.useMutation({
     // onSuccess will run after the mutation is successful
     onSuccess: async () => {
-      // Refetch folders after successful add 
-      console.log('onSuccess');
-      await folders.refetch();
+      // Refetch folders after successful add
+      console.log("onSuccess");
+      // await folders.refetch();
       setAddingFolder(false);
     },
   });
 
   const createNewFolder = async () => {
-    console.log('createNewFolder');
+    console.log("createNewFolder");
 
     try {
       // Call the mutation and wait for the response
@@ -186,14 +186,29 @@ const CreateNewFolder = () => {
         text: folderName,
       });
     } catch (error) {
-      console.error('Error creating new folder:', error);
+      console.error("Error creating new folder:", error);
     }
   };
 
   return (
     <>
-    <div className="flex justify-center items-center flex-1 text-black p-4"><button onClick={()=>setAddingFolder(true)}>Add new folder</button></div>
-    {addingFolder && <div className="flex justify-center items-center flex-1 text-black p-4"><Input placeholder="Folder Name" value={folderName} type="text" onChange={(e)=>{setFolderName(e.target.value)}} onPressEnter={createNewFolder}/></div>}</>
+      <div className="flex flex-1 items-center justify-center p-4 text-black">
+        <button onClick={() => setAddingFolder(true)}>Add new folder</button>
+      </div>
+      {addingFolder && (
+        <div className="flex flex-1 items-center justify-center p-4 text-black">
+          <Input
+            placeholder="Folder Name"
+            value={folderName}
+            type="text"
+            onChange={(e) => {
+              setFolderName(e.target.value);
+            }}
+            onPressEnter={createNewFolder}
+          />
+        </div>
+      )}
+    </>
   );
 };
 
