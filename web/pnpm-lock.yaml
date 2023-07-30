@@ -8,12 +8,9 @@ dependencies:
   '@ant-design/icons':
     specifier: ^5.1.4
     version: 5.1.4(react-dom@18.2.0)(react@18.2.0)
-  '@nanostores/react':
-    specifier: github:ai/react
-    version: github.com/ai/react/b71b8427c9ec9c780083544505495ce7b36b7059(nanostores@0.9.3)(react@18.2.0)
   '@oloren/shared':
-    specifier: ^0.0.2
-    version: 0.0.2(prop-types@15.8.1)(react@18.2.0)(solid-js@1.7.8)(svelte@4.1.1)(vue@3.3.4)
+    specifier: ^0.0.6
+    version: 0.0.6(prop-types@15.8.1)(react@18.2.0)(solid-js@1.7.8)(svelte@4.1.1)(vue@3.3.4)
   '@prisma/client':
     specifier: ^5.0.0
     version: 5.0.0(prisma@5.0.0)
@@ -508,8 +505,8 @@ packages:
       fastq: 1.15.0
     dev: true
 
-  /@oloren/shared@0.0.2(prop-types@15.8.1)(react@18.2.0)(solid-js@1.7.8)(svelte@4.1.1)(vue@3.3.4):
-    resolution: {integrity: sha512-TAc+iT+F+C5KXnd6GBYT758XSHLjjtGuFHubC8EAeVJEgommqHEaMoHVz/8RHVJUeWqWmdxxpfOYBnm7mSIlEA==}
+  /@oloren/shared@0.0.6(prop-types@15.8.1)(react@18.2.0)(solid-js@1.7.8)(svelte@4.1.1)(vue@3.3.4):
+    resolution: {integrity: sha512-YPhlDSthYGfqayh2xbSMbQ8fcV7w5b+Oxa5R5ZbUoegXO1f8s8JyvH/YeIUfxw5l5Qn367p6KHTXg1hvoG2jqA==}
     peerDependencies:
       react: ^18.2.0
     dependencies:
@@ -3073,11 +3070,6 @@ packages:
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
 
-  /nanostores@0.9.3:
-    resolution: {integrity: sha512-KobZjcVyNndNrb5DAjfs0WG0lRcZu5Q1BOrfTOxokFLi25zFrWPjg+joXC6kuDqNfSt9fQwppyjUBkRPtsL+8w==}
-    engines: {node: ^16.0.0 || ^18.0.0 || >=20.0.0}
-    dev: false
-
   /natural-compare-lite@1.4.0:
     resolution: {integrity: sha512-Tj+HTDSJJKaZnfiuw+iaF9skdPpTo2GtEly5JHnWV/hfv2Qj/9RKsGISQtLh2ox3l5EAGw487hnBee0sIJ6v2g==}
     dev: true
@@ -4993,17 +4985,3 @@ packages:
 
   /zod@3.21.4:
     resolution: {integrity: sha512-m46AKbrzKVzOzs/DZgVnG5H55N1sv1M8qZU3A8RIKbs3mrACDNeIOeilDymVb2HdmP8uwshOCF4uJ8uM9rCqJw==}
-
-  github.com/ai/react/b71b8427c9ec9c780083544505495ce7b36b7059(nanostores@0.9.3)(react@18.2.0):
-    resolution: {commit: b71b8427c9ec9c780083544505495ce7b36b7059, repo: git+ssh://git@github.com/ai/react.git, type: git}
-    id: github.com/ai/react/b71b8427c9ec9c780083544505495ce7b36b7059
-    name: '@nanostores/react'
-    version: 0.7.1
-    engines: {node: ^16.0.0 || ^18.0.0 || >=20.0.0}
-    peerDependencies:
-      nanostores: ^0.9.0
-      react: '>=18.0.0'
-    dependencies:
-      nanostores: 0.9.3
-      react: 18.2.0
-    dev: false
