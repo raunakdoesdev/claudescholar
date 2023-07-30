@@ -17,6 +17,10 @@ import { DocModal } from "~/components/DocModal";
 
 const { Header, Content, Sider } = Layout;
 
+interface Param {
+  [key: string]: string;
+}
+
 export const runtime = "experimental-edge";
 
 const App: React.FC = () => {
@@ -93,45 +97,24 @@ const App: React.FC = () => {
     const functionName = xmlDoc.querySelector("function-name")?.textContent; 
 
     // Get parameters
-    const parameters:any[] = [];
-    const paramElements = xmlDoc.getElementsByTagName("parameter");
+    const parameters: Param= {};
+    const paramElements = Array.from(xmlDoc.querySelectorAll('parameter'));
 
-    for (let param of paramElements) {
-      const nameElement = param.querySelector("parameter-name");
-      const valueElement = param.querySelector("parameter-value");
-      
-      const name = nameElement?.textContent;
-      const value = valueElement?.textContent;
-      
-      parameters.push({name, value});
-    }
-
-    // useless code to try to run the function   
-    // const params = parameters.map(p => p.name).join(', ');
-    // // Build function string
-    // let functionString = `function ${functionName}(${params}) {\n`;
+    paramElements.forEach((p:any) => {
+      const name = p.querySelector('parameter-name').textContent;
+      const value = p.querySelector('parameter-value').textContent;
     
-    // functionString += `console.log('${functionName} called with: ' + `;
+      parameters[name] = value;
+    });
+
+    const result = {
+      name: functionName,
+      parameters  
+    };
+    
+    console.log(result)
+    return result;
   
-    // parameters.forEach(p => {
-    //   functionString += `${p.name}`;
-  
-    //   if(p !== parameters[parameters.length-1]) {
-    //     functionString += `+ ', ' + `;
-    //   }
-    // });
-  
-    // functionString += `);\n
-    // }`;
-  
-    // // Remove newlines
-    // functionString = functionString.replace(/\n/g, '');
-  
-    // // Execute 
-    // // console.log(functionString)
-    // const func = new Function(functionString);
-    // console.log(func)
-    // func();  
   }
 
   const parseStream = (message: Message) => {
