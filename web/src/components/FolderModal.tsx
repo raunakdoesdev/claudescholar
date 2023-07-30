@@ -20,13 +20,27 @@ export const FolderModal = ({
   const [newFolderName, setNewFolderName] = React.useState<string>("");
 
   const handleDelete = async () => {
-    try {
-      await deleteDocument({ id: folder.id });
-      onDelete();
-      setModalVisible(false);
-    } catch (error) {
-      console.error("Error deleting document:", error);
-    }
+    Modal.confirm({
+      title: "Confirm Delete",
+      content:
+        "Are you sure you want to delete this folder? Deleting this folder will delete all documents inside of it.",
+      onOk: async () => {
+        // Perform the delete operation here
+        // Call your delete API or delete logic
+        console.log("Deleting folder...");
+        try {
+          await deleteDocument({ id: folder.id });
+          onDelete();
+          setModalVisible(false);
+        } catch (error) {
+          console.error("Error deleting document:", error);
+        }
+      },
+      onCancel: () => {
+        // Handle cancel event if needed
+        console.log("Cancel delete");
+      },
+    });
   };
 
   const handleUpdate = async () => {
@@ -35,7 +49,6 @@ export const FolderModal = ({
         id: folder.id as string,
         text: newFolderName,
       });
-      console.log("trying");
       onDelete();
       setModalVisible(false);
     } catch (error) {
