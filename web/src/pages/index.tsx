@@ -3,17 +3,15 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import {
   LaptopOutlined,
-  NotificationOutlined,
   SendOutlined,
-  UserOutlined,
 } from "@ant-design/icons";
-import type { MenuProps } from "antd";
-import { Breadcrumb, Input, Layout, Menu, Spin, theme } from "antd";
+import { MenuProps, Modal } from "antd";
+import { Breadcrumb, Input, Layout, Menu, theme } from "antd";
 import styles from "../styles/main.module.css";
 import { api } from "~/utils/api";
 import FileUpload from "~/components/FileUpload";
 import { useChat } from "ai/react";
-import React from "react";
+import React, { useState } from "react";
 
 const { Header, Content, Sider } = Layout;
 
@@ -24,11 +22,18 @@ const App: React.FC = () => {
   const {
     token: { colorBgContainer },
   } = theme.useToken();
-  const [text, setText] = React.useState<string>("");
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedDocument, setSelectedDocument] = useState<any>(null);
+
+  const handleMenuClick = (document: any) => {
+    setSelectedDocument(document);
+    setModalVisible(true);
+  };
 
   const documents = api.documents.getAll.useQuery();
+  const folders = api.folders.getAll.useQuery();
 
-  // these next two functio calls create a new document
+  // these next two function calls create a new document
   const addDocument = api.documents.add.useMutation({
     async onSuccess() {
       // Refetch documents after successful add 
@@ -38,9 +43,11 @@ const App: React.FC = () => {
   })
   
   const newText = 'New document text'
+  const newName = 'New document name'
   const addResult = () => {
     addDocument.mutateAsync({
-      text: newText 
+      text: newText,
+      name: newName, // Pass the 'name' property along with 'text'
     })
   }
 
@@ -53,28 +60,27 @@ const App: React.FC = () => {
     label: `nav ${key}`,
   }));
 
-  const items2: MenuProps["items"] = [
-    UserOutlined,
-    LaptopOutlined,
-    NotificationOutlined,
-  ].map((icon, index) => {
+  const items2: MenuProps["items"] = folders.data?.map((folder, index) => {
     const key = String(index + 1);
+
+    const filteredDocuments = documents.data?.filter((document) => document.folderId === folder.id);
 
     return {
       key: `sub${key}`,
-      icon: React.createElement(icon),
-      label: `subnav ${key}`,
+      icon: React.createElement(LaptopOutlined),
+      label: folder.title,
 
-      children: documents.data?.map((document, j) => {
+      children: filteredDocuments?.map((document, j) => {
         const subKey = index * 4 + j + 1;
         return {
           key: subKey,
           label: document.id,
+          checked: selectedDocument === document.id, // Checkmark based on selectedDocument state
+          onClick: () => handleMenuClick(document), // Open modal on click
         };
       }),
     };
   });
-
 
 
   return (
@@ -94,16 +100,30 @@ const App: React.FC = () => {
             mode="inline"
             defaultSelectedKeys={["1"]}
             defaultOpenKeys={["sub1"]}
-            style={{ height: "100%", borderRight: 0 }}
+            style={{ height: "fit-content", borderRight: 0 }}
             items={items2}
           />
+          <CreateNewFolder/>
         </Sider>
         <Layout style={{ padding: "0 24px 24px" }}>
           <Breadcrumb style={{ margin: "16px 0" }}>
             <Breadcrumb.Item>Home</Breadcrumb.Item>
-            <Breadcrumb.Item>List</Breadcrumb.Item>
-            <Breadcrumb.Item>App</Breadcrumb.Item>
           </Breadcrumb>
+          {modalVisible ? 
+          <Modal
+              title={selectedDocument.id}
+              centered
+              open={modalVisible}
+              footer={null}
+              onCancel={() => setModalVisible(false)}
+              bodyStyle={{
+                height: '50vh',
+                width: '50vw',
+              }}
+            >
+              <p>{selectedDocument.content}</p>
+            </Modal> : (
+            <>
           <Content
             style={{
               padding: 24,
@@ -133,9 +153,46 @@ const App: React.FC = () => {
                 />
               }
             />
+            </>
+          )}
         </Layout>
       </Layout>
     </Layout>
+  );
+};
+
+const CreateNewFolder = () => {
+  const [addingFolder, setAddingFolder] = useState<boolean>(false);
+  const [folderName, setFolderName] = useState<string>('');
+  const folders = api.folders.getAll.useQuery();
+
+  const addFolderMutation = api.folders.add.useMutation({
+    // onSuccess will run after the mutation is successful
+    onSuccess: async () => {
+      // Refetch folders after successful add 
+      console.log('onSuccess');
+      await folders.refetch();
+      setAddingFolder(false);
+    },
+  });
+
+  const createNewFolder = async () => {
+    console.log('createNewFolder');
+
+    try {
+      // Call the mutation and wait for the response
+      const response = await addFolderMutation.mutateAsync({
+        text: folderName,
+      });
+    } catch (error) {
+      console.error('Error creating new folder:', error);
+    }
+  };
+
+  return (
+    <>
+    <div className="flex justify-center items-center flex-1 text-black p-4"><button onClick={()=>setAddingFolder(true)}>Add new folder</button></div>
+    {addingFolder && <div className="flex justify-center items-center flex-1 text-black p-4"><Input placeholder="Folder Name" value={folderName} type="text" onChange={(e)=>{setFolderName(e.target.value)}} onPressEnter={createNewFolder}/></div>}</>
   );
 };
 

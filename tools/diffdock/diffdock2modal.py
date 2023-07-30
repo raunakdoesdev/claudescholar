@@ -1,6 +1,5 @@
 import modal
 from modal import web_endpoint
-from utils import get_pdb
 
 stub = modal.Stub("DiffDock")
 

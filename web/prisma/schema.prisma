@@ -13,5 +13,13 @@ datasource db {
 model Documents {
     id      String @id @default(cuid())
     content String
-    // name String
+    folder Folders? @relation(fields: [folderId], references: [id]) 
+    folderId String? 
+    name String
+}
+
+model Folders {
+    id      String @id @default(cuid())
+    title   String
+    documents Documents[]
 }
