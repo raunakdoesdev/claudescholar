@@ -20,6 +20,7 @@ import { api } from "~/utils/api";
 const FileUpload: React.FC = () => {
   const [processing, setProcessing] = useState(false);
   const [summarizing, setSummarizing] = useState(false);
+  const [form] = Form.useForm();
 
   const { complete, completion, isLoading, error } = useCompletion({
     api: "/api/completion",
@@ -104,6 +105,7 @@ const FileUpload: React.FC = () => {
           ) : null}
 
           <Form
+            form={form}
             onFinish={({ name, folder }: { name: string; folder?: string }) => {
               addDocument.mutate({
                 name,
@@ -112,6 +114,7 @@ const FileUpload: React.FC = () => {
               });
               setProcessing(false);
               setSummarizing(false);
+              form.resetFields();
             }}
           >
             <Form.Item label={"Name"} name="name" required>
@@ -126,7 +129,9 @@ const FileUpload: React.FC = () => {
               />
             </Form.Item>
 
-            <Typography.Paragraph>{completion}</Typography.Paragraph>
+            {summarizing ? (
+              <Typography.Paragraph>{completion}</Typography.Paragraph>
+            ) : null}
             <Button
               className="w-full"
               type="primary"
