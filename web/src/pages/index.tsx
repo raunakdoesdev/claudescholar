@@ -5,7 +5,7 @@ import {
   LaptopOutlined,
   SendOutlined,
 } from "@ant-design/icons";
-import { Button, MenuProps, Modal } from "antd";
+import { MenuProps } from "antd";
 import { Breadcrumb, Input, Layout, Menu, theme } from "antd";
 import styles from "../styles/main.module.css";
 import { api } from "~/utils/api";
@@ -44,14 +44,38 @@ const App: React.FC = () => {
     }
   })
   
-  const newText = 'New document text'
-  const newName = 'New document name'
-  const addResult = () => {
-    addDocument.mutateAsync({
-      text: newText,
-      name: newName, // Pass the 'name' property along with 'text'
-    })
+  const parseStream = (stream: string) => {
+    if (stream.indexOf('<') === -1) {
+      console.log('no tags')
+      return stream;
+    }
+
+    const functionNameStart = stream.indexOf('<');
+    const functionNameEnd = stream.indexOf('>', functionNameStart);
+    if (functionNameEnd === -1) {
+      console.log('no end tag')
+      return stream.slice(0, functionNameStart);
+    }
+    const functionName = stream.slice(functionNameStart + 1, functionNameEnd);
+    const endOfFunction = stream.indexOf('</'+functionName+'>');
+    if (endOfFunction === -1) {
+      console.log('no end of function Name', functionName)
+      return stream.slice(0, functionNameStart) + 'running ' + functionName;
+    }
+
+    const xml = stream.slice(functionNameEnd + 1, endOfFunction + functionName.length + 3);
+    console.log('xml', xml)
+    return stream.slice(0, functionNameStart) + functionName + stream.slice(endOfFunction + functionName.length + 3);
   }
+  
+  // const newText = 'New document text'
+  // const newName = 'New document name'
+  // const addResult = () => {
+  //   addDocument.mutateAsync({
+  //     text: newText,
+  //     name: newName, // Pass the 'name' property along with 'text'
+  //   })
+  // }
 
   const { messages, input, handleInputChange, handleSubmit } = useChat({
     api: "/api/chat",
@@ -65,14 +89,14 @@ const App: React.FC = () => {
   const items2: MenuProps["items"] = folders.data?.map((folder, index) => {
     const key = String(index + 1);
 
-    const filteredDocuments = documents.data?.filter((document) => document.folderId === folder.id);
+    const filteredDocuments: any = documents.data?.filter((document) => document.folderId === folder.id);
 
     return {
       key: `sub${key}`,
       icon: React.createElement(LaptopOutlined),
       label: folder.title,
 
-      children: filteredDocuments?.map((document, j) => {
+      children: filteredDocuments?.map((document: any, j: number) => {
         const subKey = index * 4 + j + 1;
         return {
           key: subKey,
@@ -120,12 +144,13 @@ const App: React.FC = () => {
               margin: 0,
               minHeight: 280,
               background: colorBgContainer,
+              overflow: "auto",
             }}
           >
             {messages.map((message, index) => {
               return (
                 <div key={index} className={styles.messageLine}>
-                  <div className={styles.message}>{message.content}</div>
+                  <div className={styles.message}>{parseStream(message.content)}</div>
                 </div>
               );
             })}
