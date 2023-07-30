@@ -31,6 +31,7 @@ import { CreateNewFolder } from "~/components/CreateNewFolder";
 import { DocModal } from "~/components/DocModal";
 import FileUpload from "~/components/FileUpload";
 import { FolderModal } from "~/components/FolderModal";
+import { InfoModal } from "~/components/InfoModal";
 import { api } from "~/utils/api";
 import styles from "../styles/main.module.css";
 
@@ -551,6 +552,7 @@ const App: React.FC = () => {
           )}
         </Layout>
       </Layout>
+      <InfoModal />
     </Layout>
   );
 };
