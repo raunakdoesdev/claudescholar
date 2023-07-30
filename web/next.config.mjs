@@ -3,6 +3,9 @@
  * for Docker builds.
  */
 await import("./src/env.mjs");
+import tm from "next-transpile-modules";
+
+const withTM = tm(["@oloren/shared"]);
 
 /** @type {import("next").NextConfig} */
 const config = {
@@ -20,4 +23,4 @@ const config = {
   },
 };
 
-export default config;
+export default withTM(config);

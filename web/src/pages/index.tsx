@@ -1,16 +1,17 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { LaptopOutlined, SendOutlined } from "@ant-design/icons";
-import { Button, MenuProps, Modal } from "antd";
-import { Breadcrumb, Input, Layout, Menu, theme } from "antd";
-import styles from "../styles/main.module.css";
-import { api } from "~/utils/api";
-import FileUpload from "~/components/FileUpload";
+import { LaptopOutlined } from "@ant-design/icons";
+import { Run } from "@oloren/shared";
 import { useChat } from "ai/react";
-import React, { useState } from "react";
+import { Breadcrumb, Button, Layout, Menu, MenuProps, theme } from "antd";
+import React, { useEffect, useState } from "react";
+import { v4 } from "uuid";
 import { CreateNewFolder } from "~/components/CreateNewFolder";
 import { DocModal } from "~/components/DocModal";
+import FileUpload from "~/components/FileUpload";
+import { api } from "~/utils/api";
+import styles from "../styles/main.module.css";
 
 const { Header, Content, Sider } = Layout;
 
@@ -82,6 +83,12 @@ const App: React.FC = () => {
     };
   });
 
+  const [uuid, setUuid] = useState("");
+
+  useEffect(() => {
+    if (!uuid) setUuid(v4());
+  }, [uuid]);
+
   return (
     <Layout className={styles.layout}>
       <Header style={{ display: "flex", alignItems: "center" }}>
@@ -93,6 +100,14 @@ const App: React.FC = () => {
         />
       </Header>
       <Layout>
+        {uuid ? (
+          <Run.Interface
+            uuid={uuid}
+            dispatcherUrl={
+              "https://dispatcher.236409319020.oloren.aws.olorencore.com"
+            }
+          />
+        ) : null}
         <Sider width={250} style={{ background: colorBgContainer }}>
           <div className="flex flex-1 items-center justify-center p-4 text-white">
             <FileUpload />
@@ -131,12 +146,29 @@ const App: React.FC = () => {
                 {messages.map((message, index) => {
                   return (
                     <div key={index} className={styles.messageLine}>
-                      <div className={styles.message}>{message.content}</div>
+                      <div className={styles.message}></div>
                     </div>
                   );
                 })}
               </Content>
-              <Input
+              <Button
+                onClick={() => {
+                  fetch(
+                    "https://dispatcher.236409319020.oloren.aws.olorencore.com/api/run/displaymol",
+                    {
+                      method: "POST",
+                      body: JSON.stringify({ uuid, smiles: "CCCCC" }),
+                    }
+                  ).then((res) => {
+                    res.json().then((data) => {
+                      console.log(data);
+                    });
+                  });
+                }}
+              >
+                Display Molecule
+              </Button>
+              {/* <Input
                 value={input}
                 className={styles.input}
                 onChange={handleInputChange}
@@ -148,7 +180,7 @@ const App: React.FC = () => {
                     onClick={handleSubmit as any}
                   />
                 }
-              />
+              /> */}
             </>
           )}
         </Layout>

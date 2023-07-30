@@ -16,7 +16,7 @@ export const documentRouter = createTRPCRouter({
       const createdDocument = await ctx.prisma.documents.create({
         data: {
           content: input.text,
-          id: input.name,
+          name: input.name,
           folderId: input.folderId,
         } as Prisma.DocumentsCreateInput,
       });
