@@ -20,6 +20,17 @@ export const documentRouter = createTRPCRouter({
     return ctx.prisma.documents.findMany();
   }),
 
+  delete: publicProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const deletedDocument = await ctx.prisma.documents.delete({
+        where: {
+          id: input.id,
+        },
+      });
+      return deletedDocument;
+    }),
+
   // New endpoint for file upload and processing
   uploadAndProcessFile: publicProcedure
     .input(z.object({ fileData: z.string() }))
