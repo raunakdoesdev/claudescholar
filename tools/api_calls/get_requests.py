@@ -52,7 +52,29 @@ def download_entrez_records_from_uid(database=olo.String(), uid_list=olo.String(
         return 'No UIDs found.'
     full_url = f'{ENTREZ_BASE_URL}/efetch.fcgi?db={database}&id={uid_list}' #&rettype=<{retrieval_type}>&retmode=<{retrieval_mode}>'
     print(full_url)
-    return get_request(full_url)
+    
+    text = get_request(full_url)
+    
+    root = ET.fromstring(text)
+    result = ''
+    for item in root.findall('.//Article'):
+        title = item.find('ArticleTitle')
+        abstract = item.find('Abstract')
+        abstract_text = ''
+
+        if abstract is not None:
+            for child in abstract:
+                if child.tag == 'AbstractText':
+                    label_text = child.get('Label', '')
+                    
+                    if child.text is not None:
+                        abstract_text += label_text + ' ' + child.text + '\n'
+                    
+        if title is not None and abstract is not None:
+            title_text = title.text if title.text is not None else ''
+            result += title_text + '\n' + abstract_text + '\n=====\n'
+    outputs = result
+    return outputs
 
 if __name__ == "__main__":
     olo.run("get_requests", port=2325)
