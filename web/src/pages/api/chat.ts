@@ -16,6 +16,8 @@ The set of possible functions for you to call is:
 
 ${functions}
 
+Under no circumstances should you call any other functions outside of the list specified above. It won't work.
+
 When the researcher’s prompt seems to match <function-description> for one of the options in <functions>, you should extract the values for all required parameters as <parameter-value> and write a response formatted with the following XML structure:
 
 <function-call>

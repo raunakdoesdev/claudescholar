@@ -1,7 +1,14 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { LaptopOutlined, SendOutlined, StopOutlined } from "@ant-design/icons";
+import {
+  ExperimentOutlined,
+  FireOutlined,
+  LaptopOutlined,
+  SearchOutlined,
+  SendOutlined,
+  StopOutlined,
+} from "@ant-design/icons";
 import { Run, socket } from "@oloren/shared";
 import { Documents } from "@prisma/client";
 import { Message, useChat } from "ai/react";
@@ -13,6 +20,7 @@ import {
   Layout,
   Menu,
   MenuProps,
+  Typography,
   message,
   theme,
 } from "antd";
@@ -33,8 +41,35 @@ interface Param {
 export const runtime = "experimental-edge";
 
 // define a json format that we can export into the above xml format
-export const FUNCTIONS = {
+export const FUNCTIONS: { [key: string]: any } = {
+  draw_protein: {
+    icon: <FireOutlined />,
+    description: "Draws the protein for the given PDB ID",
+    params: {
+      pdb_id:
+        "The PDB ID of the protein to draw. This is usually a short alphanumeric string like 1CRN or 1BRS",
+    },
+    execute: (uuid: string, params: { pdb_id: string }) => {
+      return fetch(
+        "https://dispatcher.236409319020.oloren.aws.olorencore.com/api/run/molstar",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            uuid,
+            pdbid: params.pdb_id,
+          }),
+        }
+      )
+        .then((res) => res.json())
+        .then((res) => `Finished display protein`)
+        .catch((err: Error) => String(err.message));
+    },
+  },
   draw_molecule: {
+    icon: <ExperimentOutlined />,
     description:
       "Allows user to enter a molecule via a chemical interface. Returns SMILES of compound.",
     execute: (uuid: string, params: {}) => {
@@ -52,6 +87,40 @@ export const FUNCTIONS = {
       )
         .then((res) => res.json())
         .then((res: { smiles: string }) => `The user entered ${res.smiles}`)
+        .catch((err: Error) => String(err.message));
+    },
+  },
+  pubmed_search: {
+    icon: <SearchOutlined />,
+    // https://dispatcher.236409319020.oloren.aws.olorencore.com/api/run/nihsearch
+    description:
+      "Searches pubmed for papers related to the user query. Takes in a 'query' parameter.",
+    params: {
+      query:
+        "The query to search for. This can be a phrase like 'colon cancer'",
+    },
+    execute: (uuid: string, params: { query: string }) => {
+      return fetch(
+        "https://dispatcher.236409319020.oloren.aws.olorencore.com/api/run/pubmed",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            uuid,
+            query: Object.values(params)[0],
+          }),
+        }
+      )
+        .then((res) => res.json())
+        .then((res: { result: string }) => {
+          if (res.result) return `Pubmed retrieved abstracts: ${res.result}`;
+          else {
+            console.log(res);
+            return `Error finding results`;
+          }
+        })
         .catch((err: Error) => String(err.message));
     },
   },
@@ -286,6 +355,10 @@ const App: React.FC = () => {
     }
   }
 
+  const [enabledFunctions, setEnabledFunctions] = useState(
+    Object.keys(FUNCTIONS)
+  );
+
   return (
     <Layout className={styles.layout}>
       <Layout>
@@ -301,11 +374,33 @@ const App: React.FC = () => {
             items={docMenuItems}
           />
           <CreateNewFolder />
+          <Menu
+            mode="inline"
+            style={{ height: "fit-content", borderRight: 0 }}
+            items={Object.keys(FUNCTIONS).map((key) => ({
+              key,
+              label: key,
+              icon: (
+                <div className="flex flex-row items-center space-x-2">
+                  <Checkbox
+                    checked={enabledFunctions.includes(key)}
+                    onChange={() => {
+                      if (enabledFunctions.includes(key)) {
+                        setEnabledFunctions(
+                          enabledFunctions.filter((f) => f !== key)
+                        );
+                      } else {
+                        setEnabledFunctions([...enabledFunctions, key]);
+                      }
+                    }}
+                  />{" "}
+                  {FUNCTIONS[key].icon}
+                </div>
+              ),
+            }))}
+          />
         </Sider>
-        <Layout style={{ padding: "0 24px 24px" }}>
-          <Breadcrumb style={{ margin: "16px 0" }}>
-            <Breadcrumb.Item>Home</Breadcrumb.Item>
-          </Breadcrumb>
+        <Layout style={{ padding: "24px 24px 24px" }}>
           {modalVisible ? (
             <DocModal
               selectedDocument={selectedDocument}
