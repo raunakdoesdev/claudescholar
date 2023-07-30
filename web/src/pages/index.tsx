@@ -14,6 +14,7 @@ import styles from "../styles/main.module.css";
 import { Run, socket } from "@oloren/shared";
 import { v4 } from "uuid";
 import { Documents } from "@prisma/client";
+import { FolderModal } from "~/components/FolderModal";
 
 const { Header, Content, Sider } = Layout;
 
@@ -30,6 +31,8 @@ const App: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<any>(null);
   const [checkedDocs, setCheckedDocs] = useState<Documents[]>([]);
+  const [selectedFolder, setSelectedFolder] = useState<any>(null);
+  const [folderVisible, setFolderVisible] = useState(false);
 
   const handleMenuClick = (document: Documents) => {
     setSelectedDocument(document);
@@ -53,6 +56,14 @@ const App: React.FC = () => {
     label: `nav ${key}`,
   }));
 
+  const handleIconClick = (e: any, folder: any) => {
+    e.stopPropagation(); // Prevent modal from opening
+    // Do something when the icon is clicked, based on the folder
+    console.log("Icon clicked for folder:", folder);
+    setSelectedFolder(folder);
+    setFolderVisible(true);
+  };
+
   const docMenuItems: MenuProps["items"] = folders.data?.map(
     (folder, index) => {
       const key: string = String(index + 1);
@@ -63,7 +74,17 @@ const App: React.FC = () => {
 
       return {
         key: `sub${key}`,
-        icon: React.createElement(LaptopOutlined),
+        icon: (
+          <Button
+            type="text"
+            icon={<LaptopOutlined />}
+            onClick={(e) => handleIconClick(e, folder)}
+            style={{
+              display: "flex",
+              justifyContent: "center",
+            }}
+          />
+        ),
         label: folder.title,
 
         children: filteredDocuments?.map((document: Documents, j: number) => {
@@ -219,6 +240,14 @@ const App: React.FC = () => {
               }}
               setModalVisible={setModalVisible}
               folders={folders.data || []}
+            />
+          ) : folderVisible ? (
+            <FolderModal
+              folder={selectedFolder}
+              onDelete={async () => {
+                await folders.refetch();
+              }}
+              setModalVisible={setFolderVisible}
             />
           ) : (
             <>

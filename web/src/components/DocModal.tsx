@@ -71,7 +71,7 @@ export const DocModal = ({
             icon={<DeleteOutlined />}
             danger
           >
-            Delete
+            Delete Document
           </Button>
         </div>,
       ]}

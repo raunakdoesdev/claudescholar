@@ -17,4 +17,29 @@ export const folderRouter = createTRPCRouter({
     console.log("Query called");
     return ctx.prisma.folders.findMany();
   }),
+
+  delete: publicProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const deletedFolder = await ctx.prisma.folders.delete({
+        where: {
+          id: input.id,
+        },
+      });
+      return deletedFolder;
+    }),
+
+  update: publicProcedure
+    .input(z.object({ id: z.string(), text: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const updatedFolder = await ctx.prisma.folders.update({
+        where: {
+          id: input.id,
+        },
+        data: {
+          title: input.text,
+        },
+      });
+      return updatedFolder;
+    }),
 });
