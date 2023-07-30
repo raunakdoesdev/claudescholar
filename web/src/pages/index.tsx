@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { LaptopOutlined, SendOutlined } from "@ant-design/icons";
-import { Button, MenuProps, Checkbox } from "antd";
+import { Button, MenuProps, message, Checkbox } from "antd";
 import { Breadcrumb, Input, Layout, Menu, theme } from "antd";
 import { Message, useChat } from "ai/react";
 import React, { useEffect, useState } from "react";
@@ -11,7 +11,7 @@ import { DocModal } from "~/components/DocModal";
 import FileUpload from "~/components/FileUpload";
 import { api } from "~/utils/api";
 import styles from "../styles/main.module.css";
-import { Run } from "@oloren/shared";
+import { Run, socket } from "@oloren/shared";
 import { v4 } from "uuid";
 import { Documents } from "@prisma/client";
 
@@ -92,9 +92,16 @@ const App: React.FC = () => {
   };
 
   const [uuid, setUuid] = useState("");
+  const dispatcherUrl =
+    "https://dispatcher.236409319020.oloren.aws.olorencore.com";
 
   useEffect(() => {
-    if (!uuid) setUuid(v4());
+    if (!uuid) {
+      const u = socket.manager.connect(dispatcherUrl, () => {
+        message.success("Connected to Backend");
+        setUuid(u);
+      });
+    }
   }, [uuid]);
 
   const parseXML = (xml: string) => {
@@ -171,6 +178,8 @@ const App: React.FC = () => {
     );
   };
 
+  const [loading, setLoading] = useState(false);
+
   return (
     <Layout className={styles.layout}>
       <Header style={{ display: "flex", alignItems: "center" }}>
@@ -183,12 +192,7 @@ const App: React.FC = () => {
       </Header>
       <Layout>
         {uuid ? (
-          <Run.Interface
-            uuid={uuid}
-            dispatcherUrl={
-              "https://dispatcher.236409319020.oloren.aws.olorencore.com"
-            }
-          />
+          <Run.Interface uuid={uuid} dispatcherUrl={dispatcherUrl} />
         ) : null}
         <Sider width={250} style={{ background: colorBgContainer }}>
           <div className="flex flex-1 items-center justify-center p-4 text-white">
@@ -238,20 +242,35 @@ const App: React.FC = () => {
                 })}
               </Content>
               <Button
+                loading={loading}
                 onClick={() => {
+                  setLoading(true);
                   fetch(
-                    "https://dispatcher.236409319020.oloren.aws.olorencore.com/api/run/displaymol",
+                    // "https://dispatcher.236409319020.oloren.aws.olorencore.com/api/run/calculate",
+                    // "https://dispatcher.236409319020.oloren.aws.olorencore.com/api/run/displaymol",
+                    "https://dispatcher.236409319020.oloren.aws.olorencore.com/api/run/smiles",
                     {
                       method: "POST",
-                      body: { uuid, smiles: "CCCCC" },
+                      headers: {
+                        "Content-Type": "application/json",
+                      },
+                      body: JSON.stringify({
+                        uuid,
+                        // smiles: "CCCC",
+                        // operation: "Add",
+                        // num1: 123,
+                        // num2: 234,
+                      }),
                     }
                   ).then((res) => {
                     res.json().then((data) => {
+                      setLoading(false);
                       console.log(data);
                     });
                   });
                 }}
               >
+                {uuid}
                 Display Molecule
               </Button>
               <Input
