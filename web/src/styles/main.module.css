@@ -1,32 +1,39 @@
 .layout {
-    height: 100vh;
+  height: 100vh;
 }
 .input {
-    border-radius: 16px;
-    width: 100%;
+  border-radius: 16px;
+  width: 100%;
 }
 .send {
-    cursor: pointer;
-    background-color: #fff;
+  cursor: pointer;
+  background-color: #fff;
 }
 .messageLine {
-    width: 100%;
-    display: flex;
+  width: 100%;
+  display: flex;
+  padding: 0.5rem;
 }
 .messageLine:nth-child(even) {
-    justify-content: flex-start;
+  justify-content: flex-start;
+  padding-right: 2rem;
 }
 .messageLine:nth-child(odd) {
-    justify-content: flex-end;
+  justify-content: flex-end;
+  padding-left: 2rem;
 }
 .message {
-    padding: 1rem;
-    background-color: rgb(202, 202, 255);
-    width: fit-content;
-    border-radius: 16px;
-    align-self: flex-end;
+  padding: 1rem;
+  background-color: rgb(202, 202, 255);
+  max-width: 100%;
+  border-radius: 16px;
+  align-self: flex-end;
 }
 .modal {
-    height: 50vh;
-    background-color: white;
+  padding: 2rem;
+}
+.logo {
+  color: white;
+  font-weight: 700;
+  padding-right: 1rem;
 }

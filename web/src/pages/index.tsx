@@ -1,20 +1,86 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { LaptopOutlined, SendOutlined } from "@ant-design/icons";
-import { Button, MenuProps, Modal } from "antd";
-import { Breadcrumb, Input, Layout, Menu, theme } from "antd";
-import styles from "../styles/main.module.css";
-import { api } from "~/utils/api";
-import FileUpload from "~/components/FileUpload";
-import { useChat } from "ai/react";
+import { LaptopOutlined, SendOutlined, StopOutlined } from "@ant-design/icons";
+import { Run, socket } from "@oloren/shared";
+import { Documents } from "@prisma/client";
+import { Message, useChat } from "ai/react";
+import {
+  Breadcrumb,
+  Button,
+  Checkbox,
+  Input,
+  Layout,
+  Menu,
+  MenuProps,
+  message,
+  theme,
+} from "antd";
 import React, { useState } from "react";
 import { CreateNewFolder } from "~/components/CreateNewFolder";
 import { DocModal } from "~/components/DocModal";
+import FileUpload from "~/components/FileUpload";
+import { FolderModal } from "~/components/FolderModal";
+import { api } from "~/utils/api";
+import styles from "../styles/main.module.css";
 
 const { Header, Content, Sider } = Layout;
 
+interface Param {
+  [key: string]: string;
+}
+
 export const runtime = "experimental-edge";
+
+// define a json format that we can export into the above xml format
+export const FUNCTIONS = {
+  draw_molecule: {
+    description:
+      "Allows user to enter a molecule via a chemical interface. Returns SMILES of compound.",
+    execute: (uuid: string, params: {}) => {
+      return fetch(
+        "https://dispatcher.236409319020.oloren.aws.olorencore.com/api/run/draw_molecule",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            uuid,
+          }),
+        }
+      )
+        .then((res) => res.json())
+        .then((res: { smiles: string }) => `The user entered ${res.smiles}`)
+        .catch((err: Error) => String(err.message));
+    },
+  },
+};
+
+function convertToXML(functions: typeof FUNCTIONS) {
+  const inside = Object.keys(functions)
+    .map((key) => {
+      const fn = functions["draw_molecule"];
+      return `<function>
+      <function-name>${key}</function-name>
+      <function-description>${fn.description}</function-description>
+      <function-parameters>
+        ${Object.keys(fn.execute).map((param) => {
+          return `<parameter>
+            <parameter-name>${param}</parameter-name>
+            <parameter-desc>${param}</parameter-desc>
+          </parameter>`;
+        })}
+      </function-parameters>
+    </function>`;
+    })
+    .join("\n");
+  return `<functions>
+  ${inside}
+  </functions>`;
+}
+
+const xml = convertToXML(FUNCTIONS);
 
 const App: React.FC = () => {
   const {
@@ -22,8 +88,11 @@ const App: React.FC = () => {
   } = theme.useToken();
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<any>(null);
+  const [checkedDocs, setCheckedDocs] = useState<Documents[]>([]);
+  const [selectedFolder, setSelectedFolder] = useState<any>(null);
+  const [folderVisible, setFolderVisible] = useState(false);
 
-  const handleMenuClick = (document: any) => {
+  const handleMenuClick = (document: Documents) => {
     setSelectedDocument(document);
     setModalVisible(true);
   };
@@ -31,26 +100,29 @@ const App: React.FC = () => {
   const documents = api.documents.getAll.useQuery();
   const folders = api.folders.getAll.useQuery();
 
-  // these next two function calls create a new document
-  const addDocument = api.documents.add.useMutation({
-    async onSuccess() {
-      // Refetch documents after successful add
-      console.log("onSuccess");
-      await documents.refetch();
-    },
-  });
+  const [functionOutput, setFunctionOutput] = useState<string>("");
 
-  const newText = "New document text";
-  const newName = "New document name";
-  const addResult = () => {
-    addDocument.mutateAsync({
-      text: newText,
-      name: newName, // Pass the 'name' property along with 'text'
-    });
-  };
-
-  const { messages, input, handleInputChange, handleSubmit } = useChat({
+  const {
+    messages,
+    input,
+    setInput,
+    handleInputChange,
+    handleSubmit,
+    stop,
+    append,
+  } = useChat({
     api: "/api/chat",
+    body: {
+      functions: xml,
+      additional_data: checkedDocs
+        .map((doc) => `title: ${doc.name} \ncontent: ${doc.content}`)
+        .join(","),
+    },
+    onFinish: (res) => {
+      parseStream(res, (content) => {
+        setFunctionOutput(content);
+      });
+    },
   });
 
   const items1: MenuProps["items"] = ["1", "2", "3"].map((key) => ({
@@ -58,40 +130,164 @@ const App: React.FC = () => {
     label: `nav ${key}`,
   }));
 
-  const items2: MenuProps["items"] = folders.data?.map((folder, index) => {
-    const key = String(index + 1);
+  const handleIconClick = (e: any, folder: any) => {
+    e.stopPropagation(); // Prevent modal from opening
+    setSelectedFolder(folder);
+    setFolderVisible(true);
+  };
 
-    const filteredDocuments = documents.data?.filter(
-      (document) => document.folderId === folder.id
-    );
+  const docMenuItems: MenuProps["items"] = folders.data?.map(
+    (folder, index) => {
+      const key: string = String(index + 1);
 
-    return {
-      key: `sub${key}`,
-      icon: React.createElement(LaptopOutlined),
-      label: folder.title,
+      const filteredDocuments: any = documents.data?.filter(
+        (document) => document.folderId === folder.id
+      );
 
-      children: filteredDocuments?.map((document, j) => {
-        const subKey = index * 4 + j + 1;
-        return {
-          key: subKey,
-          label: document.id,
-          checked: selectedDocument === document.id, // Checkmark based on selectedDocument state
-          onClick: () => handleMenuClick(document), // Open modal on click
-        };
-      }),
+      return {
+        key: `sub${key}`,
+        icon: (
+          <Button
+            type="text"
+            icon={<LaptopOutlined />}
+            onClick={(e) => handleIconClick(e, folder)}
+            style={{
+              display: "flex",
+              justifyContent: "center",
+            }}
+          />
+        ),
+        label: folder.title,
+
+        children: filteredDocuments?.map((document: Documents, j: number) => {
+          const subKey: number = index * 4 + j + 1;
+          return {
+            key: subKey,
+            label: document.name,
+            icon: (
+              <Checkbox
+                style={{ marginRight: 8 }}
+                onClick={(e) => handleCheck(e, document)}
+              />
+            ),
+            checked: selectedDocument === document.id, // Checkmark based on selectedDocument state
+            onClick: () => handleMenuClick(document), // Open modal on click
+          };
+        }),
+      };
+    }
+  );
+
+  const handleCheck = (e: any, document: any) => {
+    e.stopPropagation(); // Prevent modal from opening
+    console.log("checked");
+    setCheckedDocs([...checkedDocs, document]);
+  };
+
+  const [uuid, setUuid] = useState("");
+  const dispatcherUrl =
+    "https://dispatcher.236409319020.oloren.aws.olorencore.com";
+
+  const parseXML = (xml: string) => {
+    console.log(xml);
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(xml, "text/xml");
+    console.log(xmlDoc);
+    // Get function name
+    const functionName = xmlDoc.querySelector("function-name")?.textContent;
+
+    // Get parameters
+    const parameters: Param = {};
+    const paramElements = Array.from(xmlDoc.querySelectorAll("parameter"));
+
+    paramElements.forEach((p: any) => {
+      const name = p.querySelector("parameter-name").textContent;
+      const value = p.querySelector("parameter-value").textContent;
+
+      parameters[name] = value;
+    });
+
+    const result = {
+      name: functionName,
+      parameters,
     };
-  });
+
+    console.log(result);
+    return result;
+  };
+
+  const parseStream = (message: Message, run?: (x: string) => void) => {
+    if (message.role === "user") {
+      return message.content;
+    }
+
+    const stream = message.content;
+    if (stream.indexOf("<") === -1) {
+      return stream;
+    }
+
+    const functionStart = stream.indexOf("<");
+    const functionNameStart = stream.indexOf(
+      "<function-name>",
+      functionStart - 1
+    );
+    const functionNameEnd = stream.indexOf(
+      "</function-name>",
+      functionStart - 1
+    );
+    if (functionNameEnd === -1) {
+      return stream.slice(0, functionStart);
+    }
+    const functionName = stream.slice(functionNameStart + 15, functionNameEnd);
+
+    const endOfFunction = stream.indexOf("</function-call>");
+    console.log("endOfFunction", endOfFunction);
+    if (endOfFunction === -1) {
+      console.log("HEY", functionStart);
+      return stream.slice(0, functionStart) + "running " + functionName;
+    }
+
+    const xml = stream.slice(
+      functionStart,
+      endOfFunction + functionName.length + 3
+    );
+    console.log("xml", xml);
+
+    if (run) {
+      const res = parseXML(xml);
+      FUNCTIONS[res.name as "draw_molecule"]
+        .execute(uuid, res.parameters)
+        .then(run);
+    }
+
+    return (
+      stream.slice(0, functionStart) +
+      " " +
+      functionName +
+      " " +
+      stream.slice(endOfFunction + 16)
+    );
+  };
+
+  const [loading, setLoading] = useState(false);
+  const [connected, setConnected] = useState(false);
+
+  function submissionHandler(e: any) {
+    if (functionOutput) {
+      setFunctionOutput("");
+      const result = `function output: ${functionOutput}\n${input}`;
+      append({
+        role: "user",
+        content: result,
+      });
+      setInput("");
+    } else {
+      handleSubmit(e);
+    }
+  }
 
   return (
     <Layout className={styles.layout}>
-      <Header style={{ display: "flex", alignItems: "center" }}>
-        <Menu
-          theme="dark"
-          mode="horizontal"
-          defaultSelectedKeys={["2"]}
-          items={items1}
-        />
-      </Header>
       <Layout>
         <Sider width={250} style={{ background: colorBgContainer }}>
           <div className="flex flex-1 items-center justify-center p-4 text-white">
@@ -102,7 +298,7 @@ const App: React.FC = () => {
             defaultSelectedKeys={["1"]}
             defaultOpenKeys={["sub1"]}
             style={{ height: "fit-content", borderRight: 0 }}
-            items={items2}
+            items={docMenuItems}
           />
           <CreateNewFolder />
         </Sider>
@@ -117,6 +313,15 @@ const App: React.FC = () => {
                 await documents.refetch();
               }}
               setModalVisible={setModalVisible}
+              folders={folders.data || []}
+            />
+          ) : folderVisible ? (
+            <FolderModal
+              folder={selectedFolder}
+              onDelete={async () => {
+                await folders.refetch();
+              }}
+              setModalVisible={setFolderVisible}
             />
           ) : (
             <>
@@ -126,27 +331,69 @@ const App: React.FC = () => {
                   margin: 0,
                   minHeight: 280,
                   background: colorBgContainer,
+                  overflow: "auto",
                 }}
               >
+                <Run.ManagedInterface
+                  uuid={uuid}
+                  setUuid={setUuid}
+                  dispatcherUrl={dispatcherUrl}
+                />
+                {/* <Button
+                  onClick={() => {
+                  }}
+                >
+                  Click to Connect
+                </Button> */}
                 {messages.map((message, index) => {
                   return (
-                    <div key={index} className={styles.messageLine}>
-                      <div className={styles.message}>{message.content}</div>
+                    <div
+                      key={index}
+                      className={
+                        "my-1 flex w-full flex-row " +
+                        (message.role === "user"
+                          ? "justify-end"
+                          : "justify-start")
+                      }
+                    >
+                      <div
+                        className={
+                          "w-fit max-w-[70%] whitespace-pre-line rounded-md p-2 " +
+                          (message.role === "user"
+                            ? "bg-blue-200"
+                            : "bg-gray-200")
+                        }
+                      >
+                        {message.role === "assistant"
+                          ? parseStream(message)
+                          : message.content.startsWith("function output: ")
+                          ? message.content.split("\n").slice(1).join("\n")
+                          : message.content}
+                      </div>
                     </div>
                   );
                 })}
               </Content>
+
               <Input
                 value={input}
                 className={styles.input}
                 onChange={handleInputChange}
-                onPressEnter={handleSubmit as any}
+                size="large"
+                onPressEnter={submissionHandler}
                 placeholder="Chat with me"
                 addonAfter={
-                  <SendOutlined
-                    className="cursor-pointer text-gray-400 hover:text-black"
-                    onClick={handleSubmit as any}
-                  />
+                  !loading ? (
+                    <SendOutlined
+                      className="cursor-pointer text-gray-400 hover:text-black"
+                      onClick={submissionHandler}
+                    />
+                  ) : (
+                    <StopOutlined
+                      className="cursor-pointer text-gray-400 hover:text-black"
+                      onClick={stop}
+                    />
+                  )
                 }
               />
             </>

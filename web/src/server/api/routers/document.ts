@@ -5,12 +5,19 @@ import { Prisma } from "@prisma/client";
 
 export const documentRouter = createTRPCRouter({
   add: publicProcedure
-    .input(z.object({ text: z.string(), name: z.string() }))
+    .input(
+      z.object({
+        text: z.string(),
+        name: z.string(),
+        folderId: z.string().optional(),
+      })
+    )
     .mutation(async ({ ctx, input }) => {
       const createdDocument = await ctx.prisma.documents.create({
         data: {
           content: input.text,
           name: input.name,
+          folderId: input.folderId,
         } as Prisma.DocumentsCreateInput,
       });
       return createdDocument; // Return the created document instead of a string
@@ -31,31 +38,26 @@ export const documentRouter = createTRPCRouter({
       return deletedDocument;
     }),
 
-  // New endpoint for file upload and processing
-  uploadAndProcessFile: publicProcedure
-    .input(z.object({ fileData: z.string() }))
+  update: publicProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        text: z.string(),
+        name: z.string(),
+        folderId: z.string().optional(),
+      })
+    )
     .mutation(async ({ ctx, input }) => {
-      try {
-        
-        // Step 1: Upload the file and perform the action on the external server
-        const response = await axios.post("https://external-server.example/upload", {
-          fileData: input.fileData,
-        });
-
-        const resultText = response.data.resultText; // Assuming the response format from the external server is { resultText: '...' }
-
-        // Step 2: Save the result text to the document collection in Prisma
-        const savedDocument = await ctx.prisma.documents.create({
-          data: {
-            content: resultText,
-            // Any other associated data you want to save with the result text
-          },
-        });
-
-        return savedDocument;
-      } catch (error) {
-        console.error("Error processing file:", error);
-        throw new Error("File processing failed");
-      }
+      const updatedDocument = await ctx.prisma.documents.update({
+        where: {
+          id: input.id,
+        },
+        data: {
+          content: input.text,
+          name: input.name,
+          folderId: input.folderId,
+        } as Prisma.DocumentsUpdateInput,
+      });
+      return updatedDocument;
     }),
 });
