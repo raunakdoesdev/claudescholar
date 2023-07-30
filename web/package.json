@@ -13,7 +13,7 @@
   "dependencies": {
     "@ant-design/icons": "^5.1.4",
     "@nanostores/react": "github:ai/react",
-    "@oloren/shared": "^0.0.3",
+    "@oloren/shared": "^0.0.6",
     "@prisma/client": "^5.0.0",
     "@t3-oss/env-nextjs": "^0.3.1",
     "@tanstack/react-query": "^4.29.7",

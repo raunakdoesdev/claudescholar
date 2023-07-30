@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { LaptopOutlined, SendOutlined } from "@ant-design/icons";
+import { LaptopOutlined, SendOutlined, StopOutlined } from "@ant-design/icons";
 import { Button, MenuProps, message, Checkbox } from "antd";
 import { Breadcrumb, Input, Layout, Menu, theme } from "antd";
 import { Message, useChat } from "ai/react";
@@ -12,8 +12,9 @@ import FileUpload from "~/components/FileUpload";
 import { api } from "~/utils/api";
 import styles from "../styles/main.module.css";
 import { Run, socket } from "@oloren/shared";
-import { v4 } from "uuid";
 import { Documents } from "@prisma/client";
+import { Interface } from "~/components/Interface";
+import { v4 } from "uuid";
 
 const { Header, Content, Sider } = Layout;
 
@@ -22,6 +23,56 @@ interface Param {
 }
 
 export const runtime = "experimental-edge";
+
+// define a json format that we can export into the above xml format
+export const FUNCTIONS = {
+  draw_molecule: {
+    description:
+      "Allows user to enter a molecule via a chemical interface. Returns SMILES of compound.",
+    execute: (uuid: string, params: {}) => {
+      return fetch(
+        "https://dispatcher.236409319020.oloren.aws.olorencore.com/api/run/draw_molecule",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            uuid,
+          }),
+        }
+      )
+        .then((res) => res.json())
+        .then((res: { smiles: string }) => `The user entered ${res.smiles}`)
+        .catch((err: Error) => String(err.message));
+    },
+  },
+};
+
+function convertToXML(functions: typeof FUNCTIONS) {
+  const inside = Object.keys(functions)
+    .map((key) => {
+      const fn = functions["draw_molecule"];
+      return `<function>
+      <function-name>${key}</function-name>
+      <function-description>${fn.description}</function-description>
+      <function-parameters>
+        ${Object.keys(fn.execute).map((param) => {
+          return `<parameter>
+            <parameter-name>${param}</parameter-name>
+            <parameter-desc>${param}</parameter-desc>
+          </parameter>`;
+        })}
+      </function-parameters>
+    </function>`;
+    })
+    .join("\n");
+  return `<functions>
+  ${inside}
+  </functions>`;
+}
+
+const xml = convertToXML(FUNCTIONS);
 
 const App: React.FC = () => {
   const {
@@ -39,12 +90,23 @@ const App: React.FC = () => {
   const documents = api.documents.getAll.useQuery();
   const folders = api.folders.getAll.useQuery();
 
-  const { messages, input, handleInputChange, handleSubmit } = useChat({
+  const { messages, input, handleInputChange, handleSubmit, stop } = useChat({
     api: "/api/chat",
     body: {
+      functions: xml,
       additional_data: checkedDocs
         .map((doc) => `title: ${doc.name} \ncontent: ${doc.content}`)
         .join(","),
+    },
+    onFinish: (res) => {
+      parseStream(res, (content) => {
+        console.log("Function output: ", content, messages);
+        // append({
+        //   id: v4(),
+        //   content: "Function output: " + content,
+        //   role: "assistant",
+        // });
+      });
     },
   });
 
@@ -95,15 +157,6 @@ const App: React.FC = () => {
   const dispatcherUrl =
     "https://dispatcher.236409319020.oloren.aws.olorencore.com";
 
-  useEffect(() => {
-    if (!uuid) {
-      const u = socket.manager.connect(dispatcherUrl, () => {
-        message.success("Connected to Backend");
-        setUuid(u);
-      });
-    }
-  }, [uuid]);
-
   const parseXML = (xml: string) => {
     console.log(xml);
     const parser = new DOMParser();
@@ -132,7 +185,7 @@ const App: React.FC = () => {
     return result;
   };
 
-  const parseStream = (message: Message) => {
+  const parseStream = (message: Message, run?: (x: string) => void) => {
     if (message.role === "user") {
       return message.content;
     }
@@ -168,7 +221,14 @@ const App: React.FC = () => {
       endOfFunction + functionName.length + 3
     );
     console.log("xml", xml);
-    parseXML(xml);
+
+    if (run) {
+      const res = parseXML(xml);
+      FUNCTIONS[res.name as "draw_molecule"]
+        .execute(uuid, res.parameters)
+        .then(run);
+    }
+
     return (
       stream.slice(0, functionStart) +
       " " +
@@ -191,9 +251,11 @@ const App: React.FC = () => {
         />
       </Header>
       <Layout>
-        {uuid ? (
-          <Run.Interface uuid={uuid} dispatcherUrl={dispatcherUrl} />
-        ) : null}
+        <Run.ManagedInterface
+          uuid={uuid}
+          setUuid={setUuid}
+          dispatcherUrl={dispatcherUrl}
+        />
         <Sider width={250} style={{ background: colorBgContainer }}>
           <div className="flex flex-1 items-center justify-center p-4 text-white">
             <FileUpload />
@@ -230,6 +292,16 @@ const App: React.FC = () => {
                   overflow: "auto",
                 }}
               >
+                <Button
+                  onClick={() => {
+                    const u = socket.manager.connect(dispatcherUrl, () => {
+                      message.success("Connected to Backend");
+                      setUuid(u);
+                    });
+                  }}
+                >
+                  Click to Connect
+                </Button>
                 {messages.map((message, index) => {
                   return (
                     <div key={index} className={styles.messageLine}>
@@ -247,7 +319,8 @@ const App: React.FC = () => {
                   fetch(
                     // "https://dispatcher.236409319020.oloren.aws.olorencore.com/api/run/calculate",
                     // "https://dispatcher.236409319020.oloren.aws.olorencore.com/api/run/displaymol",
-                    "https://dispatcher.236409319020.oloren.aws.olorencore.com/api/run/smiles",
+                    // "https://dispatcher.236409319020.oloren.aws.olorencore.com/api/run/smiles",
+                    "https://dispatcher.236409319020.oloren.aws.olorencore.com/api/run/hello",
                     {
                       method: "POST",
                       headers: {
@@ -255,18 +328,22 @@ const App: React.FC = () => {
                       },
                       body: JSON.stringify({
                         uuid,
-                        // smiles: "CCCC",
+                        // smiles: "CC(=O)NC1=CC=C(C=C1)",
                         // operation: "Add",
                         // num1: 123,
                         // num2: 234,
                       }),
                     }
-                  ).then((res) => {
-                    res.json().then((data) => {
+                  )
+                    .then((res) => {
+                      res.json().then((data) => {
+                        setLoading(false);
+                        console.log(data);
+                      });
+                    })
+                    .catch(() => {
                       setLoading(false);
-                      console.log(data);
                     });
-                  });
                 }}
               >
                 {uuid}
@@ -279,10 +356,17 @@ const App: React.FC = () => {
                 onPressEnter={handleSubmit as any}
                 placeholder="Chat with me"
                 addonAfter={
-                  <SendOutlined
-                    className="cursor-pointer text-gray-400 hover:text-black"
-                    onClick={handleSubmit as any}
-                  />
+                  loading ? (
+                    <SendOutlined
+                      className="cursor-pointer text-gray-400 hover:text-black"
+                      onClick={handleSubmit as any}
+                    />
+                  ) : (
+                    <StopOutlined
+                      className="cursor-pointer text-gray-400 hover:text-black"
+                      onClick={stop}
+                    />
+                  )
                 }
               />
             </>
