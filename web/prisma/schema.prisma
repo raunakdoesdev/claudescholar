@@ -15,7 +15,7 @@ model Documents {
     content String
     folder Folders? @relation(fields: [folderId], references: [id]) 
     folderId String? 
-    name String?
+    name String
 }
 
 model Folders {

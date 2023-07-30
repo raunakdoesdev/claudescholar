@@ -5,14 +5,13 @@ import {
   LaptopOutlined,
   SendOutlined,
 } from "@ant-design/icons";
-import { MenuProps, Modal, Checkbox } from "antd";
-import { Breadcrumb, Input, Layout, Menu, Spin, theme } from "antd";
+import { MenuProps, Modal } from "antd";
+import { Breadcrumb, Input, Layout, Menu, theme } from "antd";
 import styles from "../styles/main.module.css";
 import { api } from "~/utils/api";
 import FileUpload from "~/components/FileUpload";
 import { useChat } from "ai/react";
 import React, { useState } from "react";
-import { CheckboxChangeEvent } from "antd/es/checkbox";
 
 const { Header, Content, Sider } = Layout;
 
@@ -44,9 +43,11 @@ const App: React.FC = () => {
   })
   
   const newText = 'New document text'
+  const newName = 'New document name'
   const addResult = () => {
     addDocument.mutateAsync({
-      text: newText 
+      text: newText,
+      name: newName, // Pass the 'name' property along with 'text'
     })
   }
 
@@ -107,8 +108,6 @@ const App: React.FC = () => {
         <Layout style={{ padding: "0 24px 24px" }}>
           <Breadcrumb style={{ margin: "16px 0" }}>
             <Breadcrumb.Item>Home</Breadcrumb.Item>
-            <Breadcrumb.Item>List</Breadcrumb.Item>
-            <Breadcrumb.Item>App</Breadcrumb.Item>
           </Breadcrumb>
           {modalVisible ? 
           <Modal
