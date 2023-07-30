@@ -304,6 +304,7 @@ const App: React.FC = () => {
                 value={input}
                 className={styles.input}
                 onChange={handleInputChange}
+                size="large"
                 onPressEnter={handleSubmit as any}
                 placeholder="Chat with me"
                 addonAfter={
