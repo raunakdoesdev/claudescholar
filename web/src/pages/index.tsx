@@ -65,10 +65,10 @@ const FUNCTIONS: { [key: string]: any } = {
         }
       )
         .then((res) => res.json())
-        .then(
-          (res: { generated: string[] }) =>
-            `The generated mols are ${res.generated.join(", ")}`
-        )
+        .then((res: { generated: string[] }) => {
+          console.log("Returned: ", res);
+          return `The generated mols are ${res.generated.join(", ")}`;
+        })
         .catch((err: Error) => String(err.message));
     },
   },
