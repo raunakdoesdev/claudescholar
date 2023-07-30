@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { LaptopOutlined, SendOutlined } from "@ant-design/icons";
-import { Button, MenuProps } from "antd";
+import { Button, MenuProps, Checkbox } from "antd";
 import { Breadcrumb, Input, Layout, Menu, theme } from "antd";
 import { Message, useChat } from "ai/react";
 import React, { useEffect, useState } from "react";
@@ -28,6 +28,8 @@ const App: React.FC = () => {
   } = theme.useToken();
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<any>(null);
+  const [checkedDocs, setCheckedDocs] = useState<any[]>([]);
+  console.log(checkedDocs);
 
   const handleMenuClick = (document: any) => {
     setSelectedDocument(document);
@@ -36,24 +38,6 @@ const App: React.FC = () => {
 
   const documents = api.documents.getAll.useQuery();
   const folders = api.folders.getAll.useQuery();
-
-  // these next two function calls create a new document
-  const addDocument = api.documents.add.useMutation({
-    async onSuccess() {
-      // Refetch documents after successful add
-      console.log("onSuccess");
-      await documents.refetch();
-    },
-  });
-
-  const newText = "New document text";
-  const newName = "New document name";
-  const addResult = () => {
-    addDocument.mutateAsync({
-      text: newText,
-      name: newName, // Pass the 'name' property along with 'text'
-    });
-  };
 
   const { messages, input, handleInputChange, handleSubmit } = useChat({
     api: "/api/chat",
@@ -67,7 +51,7 @@ const App: React.FC = () => {
   const items2: MenuProps["items"] = folders.data?.map((folder, index) => {
     const key: string = String(index + 1);
 
-    const filteredDocuments = documents.data?.filter(
+    const filteredDocuments: any = documents.data?.filter(
       (document) => document.folderId === folder.id
     );
 
@@ -81,6 +65,12 @@ const App: React.FC = () => {
         return {
           key: subKey,
           label: document.name,
+          icon: (
+            <Checkbox
+              style={{ marginRight: 8 }}
+              onClick={(e) => handleCheck(e, document)}
+            />
+          ),
           checked: selectedDocument === document.id, // Checkmark based on selectedDocument state
           onClick: () => handleMenuClick(document), // Open modal on click
         };
@@ -88,11 +78,18 @@ const App: React.FC = () => {
     };
   });
 
+  const handleCheck = (e: any, document: any) => {
+    e.stopPropagation(); // Prevent modal from opening
+    console.log("checked");
+    setCheckedDocs([...checkedDocs, document]);
+  };
+
   const [uuid, setUuid] = useState("");
 
   useEffect(() => {
     if (!uuid) setUuid(v4());
   }, [uuid]);
+
   const parseXML = (xml: string) => {
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(xml, "text/xml");
