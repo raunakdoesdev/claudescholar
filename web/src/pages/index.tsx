@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { LaptopOutlined, SendOutlined } from "@ant-design/icons";
-import { Button, MenuProps, message } from "antd";
+import { Button, MenuProps, message, Checkbox } from "antd";
 import { Breadcrumb, Input, Layout, Menu, theme } from "antd";
 import { Message, useChat } from "ai/react";
 import React, { useEffect, useState } from "react";
@@ -13,6 +13,7 @@ import { api } from "~/utils/api";
 import styles from "../styles/main.module.css";
 import { Run, socket } from "@oloren/shared";
 import { v4 } from "uuid";
+import { Documents } from "@prisma/client";
 
 const { Header, Content, Sider } = Layout;
 
@@ -28,8 +29,9 @@ const App: React.FC = () => {
   } = theme.useToken();
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<any>(null);
+  const [checkedDocs, setCheckedDocs] = useState<Documents[]>([]);
 
-  const handleMenuClick = (document: any) => {
+  const handleMenuClick = (document: Documents) => {
     setSelectedDocument(document);
     setModalVisible(true);
   };
@@ -37,26 +39,13 @@ const App: React.FC = () => {
   const documents = api.documents.getAll.useQuery();
   const folders = api.folders.getAll.useQuery();
 
-  // these next two function calls create a new document
-  const addDocument = api.documents.add.useMutation({
-    async onSuccess() {
-      // Refetch documents after successful add
-      console.log("onSuccess");
-      await documents.refetch();
-    },
-  });
-
-  const newText = "New document text";
-  const newName = "New document name";
-  const addResult = () => {
-    addDocument.mutateAsync({
-      text: newText,
-      name: newName, // Pass the 'name' property along with 'text'
-    });
-  };
-
   const { messages, input, handleInputChange, handleSubmit } = useChat({
     api: "/api/chat",
+    body: {
+      additional_data: checkedDocs
+        .map((doc) => `title: ${doc.name} \ncontent: ${doc.content}`)
+        .join(","),
+    },
   });
 
   const items1: MenuProps["items"] = ["1", "2", "3"].map((key) => ({
@@ -64,29 +53,43 @@ const App: React.FC = () => {
     label: `nav ${key}`,
   }));
 
-  const items2: MenuProps["items"] = folders.data?.map((folder, index) => {
-    const key: string = String(index + 1);
+  const docMenuItems: MenuProps["items"] = folders.data?.map(
+    (folder, index) => {
+      const key: string = String(index + 1);
 
-    const filteredDocuments = documents.data?.filter(
-      (document) => document.folderId === folder.id
-    );
+      const filteredDocuments: any = documents.data?.filter(
+        (document) => document.folderId === folder.id
+      );
 
-    return {
-      key: `sub${key}`,
-      icon: React.createElement(LaptopOutlined),
-      label: folder.title,
+      return {
+        key: `sub${key}`,
+        icon: React.createElement(LaptopOutlined),
+        label: folder.title,
 
-      children: filteredDocuments?.map((document: any, j: number) => {
-        const subKey: number = index * 4 + j + 1;
-        return {
-          key: subKey,
-          label: document.name,
-          checked: selectedDocument === document.id, // Checkmark based on selectedDocument state
-          onClick: () => handleMenuClick(document), // Open modal on click
-        };
-      }),
-    };
-  });
+        children: filteredDocuments?.map((document: Documents, j: number) => {
+          const subKey: number = index * 4 + j + 1;
+          return {
+            key: subKey,
+            label: document.name,
+            icon: (
+              <Checkbox
+                style={{ marginRight: 8 }}
+                onClick={(e) => handleCheck(e, document)}
+              />
+            ),
+            checked: selectedDocument === document.id, // Checkmark based on selectedDocument state
+            onClick: () => handleMenuClick(document), // Open modal on click
+          };
+        }),
+      };
+    }
+  );
+
+  const handleCheck = (e: any, document: any) => {
+    e.stopPropagation(); // Prevent modal from opening
+    console.log("checked");
+    setCheckedDocs([...checkedDocs, document]);
+  };
 
   const [uuid, setUuid] = useState("");
   const dispatcherUrl =
@@ -102,6 +105,7 @@ const App: React.FC = () => {
   }, [uuid]);
 
   const parseXML = (xml: string) => {
+    console.log(xml);
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(xml, "text/xml");
     console.log(xmlDoc);
@@ -138,27 +142,39 @@ const App: React.FC = () => {
       return stream;
     }
 
-    const functionNameStart = stream.indexOf("<");
-    const functionNameEnd = stream.indexOf(">", functionNameStart);
+    const functionStart = stream.indexOf("<");
+    const functionNameStart = stream.indexOf(
+      "<function-name>",
+      functionStart - 1
+    );
+    const functionNameEnd = stream.indexOf(
+      "</function-name>",
+      functionStart - 1
+    );
     if (functionNameEnd === -1) {
-      return stream.slice(0, functionNameStart);
+      return stream.slice(0, functionStart);
     }
-    const functionName = stream.slice(functionNameStart + 1, functionNameEnd);
-    const endOfFunction = stream.indexOf("</" + functionName + ">");
+    const functionName = stream.slice(functionNameStart + 15, functionNameEnd);
+
+    const endOfFunction = stream.indexOf("</function-call>");
+    console.log("endOfFunction", endOfFunction);
     if (endOfFunction === -1) {
-      return stream.slice(0, functionNameStart) + "running " + functionName;
+      console.log("HEY", functionStart);
+      return stream.slice(0, functionStart) + "running " + functionName;
     }
 
     const xml = stream.slice(
-      functionNameStart,
+      functionStart,
       endOfFunction + functionName.length + 3
     );
     console.log("xml", xml);
     parseXML(xml);
     return (
-      stream.slice(0, functionNameStart) +
+      stream.slice(0, functionStart) +
+      " " +
       functionName +
-      stream.slice(endOfFunction + functionName.length + 3)
+      " " +
+      stream.slice(endOfFunction + 16)
     );
   };
 
@@ -187,7 +203,7 @@ const App: React.FC = () => {
             defaultSelectedKeys={["1"]}
             defaultOpenKeys={["sub1"]}
             style={{ height: "fit-content", borderRight: 0 }}
-            items={items2}
+            items={docMenuItems}
           />
           <CreateNewFolder />
         </Sider>
