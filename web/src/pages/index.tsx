@@ -3,9 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import {
   LaptopOutlined,
-  NotificationOutlined,
   SendOutlined,
-  UserOutlined,
 } from "@ant-design/icons";
 import { MenuProps, Modal, Checkbox } from "antd";
 import { Breadcrumb, Input, Layout, Menu, Spin, theme } from "antd";
