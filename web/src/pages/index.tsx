@@ -237,11 +237,6 @@ const App: React.FC = () => {
     },
   });
 
-  const items1: MenuProps["items"] = ["1", "2", "3"].map((key) => ({
-    key,
-    label: `nav ${key}`,
-  }));
-
   const handleIconClick = (e: any, folder: any) => {
     e.stopPropagation(); // Prevent modal from opening
     setSelectedFolder(folder);
@@ -414,7 +409,14 @@ const App: React.FC = () => {
   return (
     <Layout className={styles.layout}>
       <Layout>
-        <Sider width={250} style={{ background: colorBgContainer }}>
+        <Sider
+          width={250}
+          style={{
+            background: colorBgContainer,
+            height: "100vh",
+            overflowY: "auto",
+          }}
+        >
           <div className="flex flex-row items-center justify-center p-4 text-2xl font-semibold text-black">
             ClaudeScholar
           </div>
