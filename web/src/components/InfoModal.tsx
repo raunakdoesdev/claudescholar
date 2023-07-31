@@ -42,7 +42,10 @@ export const InfoModal = () => {
           RFDiffusion, and instantly find similar molecules!
         </Typography.Paragraph>
         <Typography.Paragraph>
-          To get started, click the "Get Started!" button below.
+          Give feedback or sign up for our waitlist{" "}
+          <a href="https://docs.google.com/forms/d/1h0Uv-pg1lTLfTSlbfIAsA4O-NhM-5njD6T3-FEJqidM/">
+            here!
+          </a>{" "}
         </Typography.Paragraph>
       </Modal>
     </div>
