@@ -45,6 +45,6 @@ Prompt engineering improvements to improve accuracy of actions
 
 ## Acknowledgements 
 We would like to thank and acknowledge the creators of many of the open source tools and projects that were used in this work. We were truly standing on the shoulders of giants.
-- [David Huang](https://twitter.com/dhuang26) for his implementation of CrEM algorithm that was the basis of the molecular mutation tool.
+- [David Huang](https://twitter.com/dhuang26) for his help overall and implementation of CrEM algorithm used for muatations!
 - [Mol*](molstar.org) tool for protein visualization
 - [EPAM](https://lifescience.opensource.epam.com/ketcher/index.html) for their open source molecular editor, Ketcher
