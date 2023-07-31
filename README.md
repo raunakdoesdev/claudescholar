@@ -43,7 +43,7 @@ Adding a toxicology filter to prevent the use of ClaudeScholar for harmful reaso
 Reduce latency for our API calls to make the chat experience faster
 Prompt engineering improvements to improve accuracy of actions
 
-## Oloren 
+## Acknowledgements 
 We would like to thank and acknowledge the creators of many of the open source tools and projects that were used in this work. We were truly standing on the shoulders of giants.
 - [David Huang](https://twitter.com/dhuang26) for his implementation of CrEM algorithm that was the basis of the molecular mutation tool.
 - [Mol*](molstar.org) tool for protein visualization
