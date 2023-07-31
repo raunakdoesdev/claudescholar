@@ -44,7 +44,9 @@ Reduce latency for our API calls to make the chat experience faster
 Prompt engineering improvements to improve accuracy of actions
 
 ## Acknowledgements 
-We would like to thank and acknowledge the creators of many of the open source tools and projects that were used in this work. We were truly standing on the shoulders of giants.
+We would like to thank and acknowledge the creators of many of the tools and projects that were used in this work. We were truly standing on the shoulders of giants.
 - [David Huang](https://twitter.com/dhuang26) for his help overall and implementation of CrEM algorithm used for muatations!
+- [Oloren Orchestrator](https://oloren.ai) for building and deploying the backend workflows
 - [Mol*](molstar.org) tool for protein visualization
 - [EPAM](https://lifescience.opensource.epam.com/ketcher/index.html) for their open source molecular editor, Ketcher
+- [Vercel](vercel.com) for both Next.js framework + deployment
