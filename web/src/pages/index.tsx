@@ -34,6 +34,8 @@ import { FolderModal } from "~/components/FolderModal";
 import { InfoModal } from "~/components/InfoModal";
 import { api } from "~/utils/api";
 import styles from "../styles/main.module.css";
+import Alert from "antd/es/alert/Alert";
+import Link from "next/link";
 
 const { Header, Content, Sider } = Layout;
 
@@ -421,7 +423,20 @@ const App: React.FC = () => {
             ClaudeScholar
           </div>
           <div className="flex flex-1 items-center justify-center p-4 text-white">
-            <FileUpload />
+            <Alert
+              type="info"
+              description={
+                <Typography.Text>
+                  Unfortunately file upload has been disabled for the public
+                  demo due to some abuse of the backend. We will gate this
+                  feature with authentication soon.{" "}
+                  <Link href="https://docs.google.com/forms/d/e/1FAIpQLScMthvbpMrwSIqF_oDDQEKpgaWAGkMu9h5BmhYQzfrkX2wibA/viewform">
+                    Please fill out this waitlist to be notified of updates to
+                    app.
+                  </Link>
+                </Typography.Text>
+              }
+            />
           </div>
           <Menu
             mode="inline"
