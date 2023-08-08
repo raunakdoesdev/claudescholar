@@ -13,7 +13,7 @@ datasource db {
 model Documents {
     id       String   @id @default(cuid())
     content  String
-    folder   Folders? @relation(fields: [folderId], references: [id])
+    folder   Folders? @relation("FolderToDocuments", fields: [folderId], references: [id], onDelete: Cascade)
     folderId String?
     name     String
 }
@@ -21,5 +21,5 @@ model Documents {
 model Folders {
     id        String      @id @default(cuid())
     title     String
-    documents Documents[]
+    documents Documents[] @relation("FolderToDocuments")
 }
