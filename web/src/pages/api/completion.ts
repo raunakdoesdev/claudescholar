@@ -14,7 +14,7 @@ export default async function handler(req: Request, res: Response) {
     },
     body: JSON.stringify({
       prompt: `Human: ${prompt}\n\nAssistant:`,
-      model: "claude-instant-1",
+      model: "claude-instant-2",
       temperature: 0.2,
       max_tokens_to_sample: 800,
       stream: true,
