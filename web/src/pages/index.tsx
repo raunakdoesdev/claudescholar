@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import {
   CheckCircleTwoTone,
   ExperimentOutlined,
@@ -34,8 +31,8 @@ import { FolderModal } from "~/components/FolderModal";
 import { InfoModal } from "~/components/InfoModal";
 import { api } from "~/utils/api";
 import styles from "../styles/main.module.css";
-import Alert from "antd/es/alert/Alert";
-import Link from "next/link";
+import { signIn, useSession } from "next-auth/react";
+import AuthShowcase from "~/components/AuthShowcase";
 
 const { Header, Content, Sider } = Layout;
 
@@ -193,6 +190,7 @@ const App: React.FC = () => {
   const [checkedDocs, setCheckedDocs] = useState<Documents[]>([]);
   const [selectedFolder, setSelectedFolder] = useState<any>(null);
   const [folderVisible, setFolderVisible] = useState(false);
+  const { data: sessionData } = useSession();
 
   const handleMenuClick = (document: Documents) => {
     setSelectedDocument(document);
@@ -392,7 +390,6 @@ const App: React.FC = () => {
   };
 
   const [loading, setLoading] = useState(false);
-  const [connected, setConnected] = useState(false);
 
   function submissionHandler(e: any) {
     if (functionOutput) {
@@ -410,6 +407,10 @@ const App: React.FC = () => {
 
   return (
     <Layout className={styles.layout}>
+      <Header className={styles.header}>
+        <div className="pl-4 font-semibold text-white">ClaudeScholar</div>
+        <AuthShowcase />
+      </Header>
       <Layout>
         <Sider
           width={250}
@@ -419,24 +420,14 @@ const App: React.FC = () => {
             overflowY: "auto",
           }}
         >
-          <div className="flex flex-row items-center justify-center p-4 text-2xl font-semibold text-black">
-            ClaudeScholar
-          </div>
-          <div className="flex flex-1 items-center justify-center p-4 text-white">
-            <Alert
-              type="info"
-              description={
-                <Typography.Text>
-                  Unfortunately file upload has been disabled for the public
-                  demo due to some abuse of the backend. We will gate this
-                  feature with authentication soon.{" "}
-                  <Link href="https://docs.google.com/forms/d/e/1FAIpQLScMthvbpMrwSIqF_oDDQEKpgaWAGkMu9h5BmhYQzfrkX2wibA/viewform">
-                    Please fill out this waitlist to be notified of updates to
-                    app.
-                  </Link>
-                </Typography.Text>
-              }
-            />
+          <div className="mt-4 flex flex-1 items-center justify-center p-4 text-white">
+            {sessionData ? (
+              <FileUpload />
+            ) : (
+              <Button type="primary" onClick={() => signIn("google")}>
+                Sign In To Save Documents
+              </Button>
+            )}
           </div>
           <Menu
             mode="inline"
@@ -445,7 +436,7 @@ const App: React.FC = () => {
             style={{ height: "fit-content", borderRight: 0 }}
             items={docMenuItems}
           />
-          <CreateNewFolder />
+          {sessionData && <CreateNewFolder />}
           <h3 className="text-center">Tools</h3>
           <Menu
             mode="inline"
@@ -508,12 +499,6 @@ const App: React.FC = () => {
                   overflow: "auto",
                 }}
               >
-                {/* <Button
-                  onClick={() => {
-                  }}
-                >
-                  Click to Connect
-                </Button> */}
                 {messages.map((message, index) => {
                   return (
                     <div
@@ -575,3 +560,4 @@ const App: React.FC = () => {
 };
 
 export default App;
+

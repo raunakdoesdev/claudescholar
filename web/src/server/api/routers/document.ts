@@ -1,7 +1,8 @@
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
-import axios from "axios";
 import { Prisma } from "@prisma/client";
+import { getServerSession } from "next-auth/next"
+// import { authOptions } from "~/pages/api/auth/[...nextauth]"
 
 export const documentRouter = createTRPCRouter({
   add: publicProcedure
@@ -17,14 +18,31 @@ export const documentRouter = createTRPCRouter({
         data: {
           content: input.text,
           name: input.name,
-          folderId: input.folderId,
+          folder: {
+            connect: {
+              id: input.folderId,
+            },
+          },
+          user: {
+            connect: {
+              id: ctx.session?.user.id,
+            },
+          },
         } as Prisma.DocumentsCreateInput,
       });
       return createdDocument; // Return the created document instead of a string
     }),
 
   getAll: publicProcedure.query(({ ctx }) => {
-    return ctx.prisma.documents.findMany();
+    if (!ctx.session?.user.id) {
+      return []; 
+    }
+
+    return ctx.prisma.documents.findMany({
+      where: {
+        userId: ctx.session?.user.id,
+      },
+    });
   }),
 
   delete: publicProcedure

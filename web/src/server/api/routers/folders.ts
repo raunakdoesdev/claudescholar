@@ -8,14 +8,26 @@ export const folderRouter = createTRPCRouter({
       const createdFolder = await ctx.prisma.folders.create({
         data: {
           title: input.text,
+          user: {
+            connect: {
+              id: ctx.session?.user.id,
+            }
+          }
         },
       });
       return createdFolder; // Return the created document instead of a string
     }),
 
   getAll: publicProcedure.query(({ ctx }) => {
-    console.log("Query called");
-    return ctx.prisma.folders.findMany();
+    if (!ctx.session?.user.id) {
+      return []; 
+    }
+
+    return ctx.prisma.folders.findMany({
+      where: {
+        userId: ctx.session?.user.id,
+      },
+    });
   }),
 
   delete: publicProcedure

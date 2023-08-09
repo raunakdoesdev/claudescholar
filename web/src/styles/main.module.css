@@ -56,3 +56,12 @@
   bottom: 3rem;
   right: 3rem;
 }
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 60px;
+  padding: 1rem;
+  background-color: #151515;
+  color: white;
+}
