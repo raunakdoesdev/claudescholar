@@ -3,6 +3,7 @@ import {
   ExperimentOutlined,
   FireOutlined,
   LaptopOutlined,
+  MenuUnfoldOutlined,
   ReloadOutlined,
   SearchOutlined,
   SendOutlined,
@@ -191,6 +192,7 @@ const App: React.FC = () => {
   const [selectedFolder, setSelectedFolder] = useState<any>(null);
   const [folderVisible, setFolderVisible] = useState(false);
   const { data: sessionData } = useSession();
+  const [sidebarVisible, setSidebarVisible] = useState(true);
 
   const handleMenuClick = (document: Documents) => {
     setSelectedDocument(document);
@@ -408,6 +410,10 @@ const App: React.FC = () => {
   return (
     <Layout className={styles.layout}>
       <Header className={styles.header}>
+        <MenuUnfoldOutlined
+          onClick={() => setSidebarVisible(!sidebarVisible)}
+          className={styles.hamburger}
+        />
         <div className="pl-4 font-semibold text-white">ClaudeScholar</div>
         <AuthShowcase />
       </Header>
@@ -419,6 +425,7 @@ const App: React.FC = () => {
             height: "100vh",
             overflowY: "auto",
           }}
+          className={`${styles.sider}${sidebarVisible ? "Visible" : ""}`}
         >
           <div className="mt-4 flex flex-1 items-center justify-center p-4 text-white">
             {sessionData ? (
@@ -560,4 +567,3 @@ const App: React.FC = () => {
 };
 
 export default App;
-

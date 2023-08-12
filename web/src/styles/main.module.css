@@ -65,3 +65,19 @@
   background-color: #151515;
   color: white;
 }
+.hamburger {
+  display: none;
+  cursor: pointer;
+}
+@media screen and (max-width: 500px) {
+  .siderVisible {
+    display: block;
+  }
+  .sider {
+    display: none;
+  }
+  .hamburger {
+    display: block;
+  }
+  
+}
