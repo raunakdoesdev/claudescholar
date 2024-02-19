@@ -1,6 +1,7 @@
 # Claude Scholar
 
 Powered by [Oloren AI's Orchestrator](oloren.ai).
+First place prize at Anthropic's hackathon
 
 ## The Problem
 Biology research is often slow and tedious due to the vast amount of literature that must be cross-referenced to generate ideas, and the time-intensive simulations needed to narrow down options. Researchers waste countless hours combing through papers just to find promising protein and molecule combinations to investigate. Once they finally identify potential candidates, they must run lengthy conventional simulations to determine if binding and other molecular interactions will be successful. 
